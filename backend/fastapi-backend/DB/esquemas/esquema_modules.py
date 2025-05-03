@@ -79,5 +79,22 @@ def module_esquema(module) -> dict:
 def modules_esquema(modules) -> list:
     """
     Convert a list of MongoDB module objects to a list of dictionaries
+    showing all existing data with minimal transformation
     """
-    return [module_esquema(module) for module in modules]
+    result = []
+
+    for module in modules:
+        # Create a copy of the module to avoid modifying the original
+        module_dict = dict(module)
+
+        # Convert ObjectId to string for JSON serialization
+        if "_id" in module_dict:
+            module_dict["_id"] = str(module_dict["_id"])
+
+        # Add id field for consistency if not present but _id exists
+        if "id" not in module_dict and "_id" in module:
+            module_dict["id"] = str(module["_id"])
+
+        result.append(module_dict)
+
+    return result
