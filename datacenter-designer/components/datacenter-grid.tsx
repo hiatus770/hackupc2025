@@ -94,9 +94,9 @@ export default function DatacenterGrid({
   const checkPlacementValidity = (x: number, y: number, module: Module, rotation: number): boolean => {
     if (!module) return false
 
-    // Get module dimensions, accounting for rotation
-    const moduleWidth = rotation % 180 === 0 ? module.dim[0] : module.dim[1]
-    const moduleHeight = rotation % 180 === 0 ? module.dim[1] : module.dim[0]
+    // Get module dimensions, accounting for rotation, scaled down by 10x
+    const moduleWidth = rotation % 180 === 0 ? module.dim[0] / 10 : module.dim[1] / 10
+    const moduleHeight = rotation % 180 === 0 ? module.dim[1] / 10 : module.dim[0] / 10
 
     // Check if module is within grid bounds
     if (x < 0 || y < 0 || x + moduleWidth > width || y + moduleHeight > height) {
@@ -105,8 +105,8 @@ export default function DatacenterGrid({
 
     // Check for overlaps with existing modules
     for (const placed of placedModules) {
-      const placedWidth = placed.rotation % 180 === 0 ? placed.module.dim[0] : placed.module.dim[1]
-      const placedHeight = placed.rotation % 180 === 0 ? placed.module.dim[1] : placed.module.dim[0]
+      const placedWidth = placed.rotation % 180 === 0 ? placed.module.dim[0] / 10 : placed.module.dim[1] / 10
+      const placedHeight = placed.rotation % 180 === 0 ? placed.module.dim[1] / 10 : placed.module.dim[0] / 10
 
       // Check for overlap
       if (
@@ -159,7 +159,13 @@ export default function DatacenterGrid({
       {placedModules.map((placedModule) => (
         <ModuleObject
           key={placedModule.id}
-          placedModule={placedModule}
+          placedModule={{
+            ...placedModule,
+            module: {
+              ...placedModule.module,
+              dim: [placedModule.module.dim[0] / 10, placedModule.module.dim[1] / 10], // Scale down by 10x
+            },
+          }}
           gridWidth={width}
           gridHeight={height}
           onRemove={() => onRemoveModule(placedModule.id)}
@@ -171,7 +177,10 @@ export default function DatacenterGrid({
         <ModuleObject
           placedModule={{
             id: "preview",
-            module: selectedModule,
+            module: {
+              ...selectedModule,
+dim: [selectedModule.dim[0] / 10, selectedModule.dim[1] / 10], // Scale down by 10x
+            },
             position: hoverPosition,
             rotation,
           }}
