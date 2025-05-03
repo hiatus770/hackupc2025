@@ -132,6 +132,7 @@ export default function DatacenterGrid({
 
       {/* Grid labels */}
       {Array.from({ length: width + 1 }).map((_, i) => (
+        i % 10 === 0 && // Only show every 10th label
         <Text
           key={`x-${i}`}
           position={[i - width / 2, 0.01, -height / 2 - 0.5]}
@@ -139,11 +140,13 @@ export default function DatacenterGrid({
           fontSize={0.5}
           color="#88c0d0"
         >
-          {i}
+          {i*10}
         </Text>
       ))}
 
       {Array.from({ length: height + 1 }).map((_, i) => (
+        
+          i % 10 === 0 && // Only show every 10th label
         <Text
           key={`y-${i}`}
           position={[-width / 2 - 0.5, 0.01, i - height / 2]}
@@ -151,8 +154,9 @@ export default function DatacenterGrid({
           fontSize={0.5}
           color="#88c0d0"
         >
-          {i}
+          {i*10}
         </Text>
+        
       ))}
 
       {/* Placed modules */}
