@@ -4,7 +4,6 @@ from bson import ObjectId
 from app.models.schemas import DatacenterSpec
 from app.repositories.datacenter_spec_repository import DatacenterSpecRepository
 from DB.cliente import cliente_modulos
-from DB.esquemas.esquema_datacenterf import datacenter_esquema, datacenters_esquema
 from DB.esquemas.esquema_datacenter_specs import datacenter_spec_esquema, datacenter_specs_esquema
 import csv
 import io
