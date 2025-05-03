@@ -96,7 +96,7 @@ export default function ModuleObject({
         anchorY="middle"
         maxWidth={width - 0.2}
       >
-        {module.name}
+        {module.id}
       </Text>
 
       {/* Module details (only show when hovered and not a preview) */}
@@ -110,7 +110,7 @@ export default function ModuleObject({
           anchorY="middle"
           maxWidth={width - 0.2}
         >
-          {`${width}x${depth}m • $${module.cost}`}
+          {`${width}x${depth}m • $${module.price}`}
         </Text>
       )}
     </group>

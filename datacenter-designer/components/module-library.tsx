@@ -31,7 +31,7 @@ export default function ModuleLibrary({ modules, onSelectModule, selectedModule 
   // Filter modules based on search term
   const filterModules = (moduleList: Module[]) => {
     if (!searchTerm) return moduleList
-    return moduleList.filter((module) => module.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    return moduleList.filter((module) => module.id.toLowerCase().includes(searchTerm.toLowerCase()))
   }
 
   const categories = Object.keys(groupedModules)
@@ -52,17 +52,19 @@ export default function ModuleLibrary({ modules, onSelectModule, selectedModule 
       </div>
 
       <Tabs defaultValue={categories[0] || "all"}>
-        <TabsList className="w-full bg-[#011845] border border-[#0e3e7b]">
-          {categories.map((category) => (
-            <TabsTrigger
-              key={category}
-              value={category}
-              className="data-[state=active]:bg-[#0e3e7b] data-[state=active]:text-white"
-            >
-              {category}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <ScrollArea className="w-full pb-2" orientation="horizontal" scrollHideDelay={0} type="scroll">
+          <TabsList className="w-max bg-[#011845] border border-[#0e3e7b] flex-nowrap inline-flex">
+            {categories.map((category) => (
+              <TabsTrigger
+                key={category}
+                value={category}
+                className="data-[state=active]:bg-[#0e3e7b] data-[state=active]:text-white whitespace-nowrap"
+              >
+                {category}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </ScrollArea>
 
         {categories.map((category) => (
           <TabsContent key={category} value={category} className="mt-2 flex-1 overflow-hidden">
@@ -70,17 +72,16 @@ export default function ModuleLibrary({ modules, onSelectModule, selectedModule 
               <div className="grid grid-cols-1 gap-2">
                 {filterModules(groupedModules[category]).map((module) => (
                   <div
-                    key={module.name}
-                    className={`p-3 border rounded cursor-pointer transition-colors ${
-                      selectedModule?.name === module.name
+                    key={module.id}
+                    className={`p-3 border rounded cursor-pointer transition-colors ${selectedModule?.id === module.id
                         ? "bg-[#0e3e7b] border-[#88c0d0]"
                         : "bg-[#011845] border-[#0e3e7b] hover:bg-[#0a2d5e]"
-                    }`}
+                      }`}
                     onClick={() => onSelectModule(module)}
                   >
-                    <div className="font-medium">{module.name}</div>
+                    <div className="font-medium">{module.id}</div>
                     <div className="text-sm text-[#88c0d0]">
-                      {module.dim[0]}x{module.dim[1]} • ${module.cost}
+                      {module.dim[0]}x{module.dim[1]} • ${module.price}
                     </div>
                     <div className="text-xs mt-1 text-[#a9c4d4]">
                       {module.description || "No description available"}

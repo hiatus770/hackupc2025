@@ -3,77 +3,46 @@ import type { DatacenterStyle } from "@/types/datacenter"
 
 export async function GET() {
   // This would typically come from a database or external file
-  const styles: DatacenterStyle[] = [
+  const styles: DatacenterStyle[] = 
+  [
     {
-      id: "server_squares",
-      name: "Server Squares",
-      description: "Optimized for maximum compute density with efficient cooling and power distribution.",
-      focus: "processing",
-      recommended_modules: [
-        "Transformer_1000",
-        "Water_Supply_Advanced",
-        "Water_Chiller_Medium",
-        "Server_Rack_HighDensity",
-        "Network_Rack_Advanced",
-      ],
+      "id": "server_square",
+      "name": "Server Squares",
+      "description": "Balanced mid-tier data center with decent processing and storage capabilities.",
+      "grid_connection": 3,
+      "water_connection": 1,
+      "dim": [1000, 500],
+      "data_storage": 1000,
+      "processing": 1000,
+      "price": 1000000,
+      "focus": "server"
     },
     {
-      id: "data_centers",
-      name: "Data Centers",
-      description: "Balanced approach with focus on storage capacity and reliability.",
-      focus: "storage",
-      recommended_modules: [
-        "Transformer_500",
-        "Water_Supply_Basic",
-        "Water_Chiller_Small",
-        "Storage_Rack_SSD",
-        "Network_Rack_Basic",
-        "Server_Rack_Standard",
-      ],
+      "id": "dense_storage",
+      "name": "Dense Storage",
+      "description": "Optimized for maximum data storage with minimal space usage.",
+      "grid_connection": -1,
+      "water_connection": -1,
+      "dim": [-1, -1],
+      "data_storage": -1,
+      "processing": null,
+      "price": 5000000,
+      "focus": "storage"
     },
     {
-      id: "super_computers",
-      name: "Super Computers",
-      description: "High-performance computing focus with maximum processing power and advanced cooling.",
-      focus: "processing",
-      recommended_modules: [
-        "Transformer_2000",
-        "Water_Supply_Advanced",
-        "Water_Treatment_Recycling",
-        "Water_Chiller_Large",
-        "Server_Rack_GPU",
-        "Network_Rack_Enterprise",
-      ],
-    },
-    {
-      id: "network_hub",
-      name: "Network Hub",
-      description: "Optimized for network throughput and connectivity with moderate compute resources.",
-      focus: "network",
-      recommended_modules: [
-        "Transformer_500",
-        "Water_Supply_Basic",
-        "Water_Chiller_Small",
-        "Network_Rack_Enterprise",
-        "Server_Rack_Standard",
-      ],
-    },
-    {
-      id: "storage_cluster",
-      name: "Storage Cluster",
-      description: "Maximized storage capacity with efficient power usage and moderate cooling requirements.",
-      focus: "storage",
-      recommended_modules: [
-        "Transformer_500",
-        "Water_Supply_Basic",
-        "Water_Chiller_Small",
-        "Storage_Rack_HDD",
-        "Storage_Rack_SSD",
-        "Storage_Rack_NVMe",
-        "Network_Rack_Advanced",
-      ],
-    },
+      "id": "supercomputer",
+      "name": "Supercomputer",
+      "description": "High-performance compute-heavy unit with advanced processing capabilities.",
+      "grid_connection": -1,
+      "water_connection": -1,
+      "dim": [2000, 1000],
+      "data_storage": null,
+      "processing": -1,
+      "price": null,
+      "focus": "processing"
+    }
   ]
+  
 
   return NextResponse.json(styles)
 }

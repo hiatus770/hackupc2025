@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, Grid } from "@react-three/drei"
 import ModuleLibrary from "./module-library"
@@ -21,6 +21,30 @@ export default function DatacenterDesigner() {
   const [totalPower, setTotalPower] = useState(0)
   const [totalWater, setTotalWater] = useState(0)
   const [isPlacingModule, setIsPlacingModule] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(300);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const resizingRef = useRef(false);
+
+  const startResizing = (e: React.MouseEvent) => {
+    e.preventDefault();
+    resizingRef.current = true;
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', stopResizing);
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!resizingRef.current) return;
+    const newWidth = e.clientX;
+    if (newWidth >= 300) {
+      setSidebarWidth(newWidth);
+    }
+  };
+
+  const stopResizing = () => {
+    resizingRef.current = false;
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', stopResizing);
+  };
 
   // Load module and datacenter style definitions
   useEffect(() => {
@@ -165,8 +189,12 @@ export default function DatacenterDesigner() {
         </div>
       </div>
 
-      <div className={styles.mainContent}>
-        <div className="w-[300px] bg-[#01193d] border-r border-[#0e3e7b] flex flex-col h-[calc(100vh-60px)] overflow-hidden">
+      <div className={styles.mainContent} style={{ display: 'flex', width: '100%', position: 'relative' }}>
+        <div
+          ref={sidebarRef}
+          style={{ width: `${sidebarWidth}px`, minWidth: '300px', maxWidth: '30vw', flexShrink: 0 }}
+          className="bg-[#01193d] border-r border-[#0e3e7b] flex flex-col h-[calc(100vh-60px)] overflow-auto relative"
+        >
           <ModuleLibrary modules={modules} onSelectModule={handleModuleSelect} selectedModule={selectedModule} />
 
           {selectedModule && (
@@ -186,9 +214,14 @@ export default function DatacenterDesigner() {
             gridSize={gridSize}
             onGridSizeChange={handleGridSizeChange}
           />
+
+          <div
+            className="absolute right-0 top-0 bottom-0 w-2 bg-[#0e3e7b] cursor-ew-resize hover:bg-blue-500 z-10"
+            onMouseDown={startResizing}
+          />
         </div>
 
-        <div className={styles.canvasContainer}>
+        <div className={styles.canvasContainer} style={{ flex: '1', overflow: 'hidden' }}>
           <Canvas camera={{ position: [0, 15, 15], fov: 50 }}>
             <ambientLight intensity={0.5} />
             <pointLight position={[10, 10, 10]} intensity={0.8} />
