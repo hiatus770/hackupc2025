@@ -38,7 +38,7 @@ async def get_modules():
     return modules
 
 # Place specific routes BEFORE dynamic routes with path parameters
-@router.post("/import", response_description="Import modules from CSV data", status_code=201)
+@router.post("/csv-import", response_description="Import modules from CSV data", status_code=201)
 async def import_modules(import_request: ModuleImportRequest):
     """
     Import modules from tab-separated CSV data.
