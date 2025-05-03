@@ -61,3 +61,20 @@
   flex: 1;
   position: relative;
 }
+
+.hideScrollbar {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+}
+
+.hideScrollbar::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
+}
+
+/* Si quieres tener una barra personalizada en lugar de ocultarla completamente */
+.customScrollbar {
+  scrollbar-width: none;
+}
