@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react"
 import { Text } from "@react-three/drei"
 import { useLoader } from "@react-three/fiber"
-import { OBJLoader , MTLLoader} from "three-stdlib"
+import { OBJLoader, MTLLoader } from "three-stdlib"
 import type { PlacedModule } from "@/types/datacenter"
 
 interface ModuleObjectProps {
@@ -44,22 +44,39 @@ function ModuleModel({ moduleId, width, depth, color }: { moduleId: string; widt
   // Force color on all meshes
   obj.traverse?.((child: any) => {
     if (child.isMesh) {
-      child.material = child.material.clone()
-      child.material.color.set(color)
+      if (child.material) {
+        if (Array.isArray(child.material)) {
+          child.material = child.material.map((mat: any) => {
+            if (mat && mat.color && mat.color.set) mat.color.set(color)
+            return mat
+          })
+        } else {
+          if (child.material.color && child.material.color.set) {
+            child.material.color.set(color)
+          }
+        }
+      }
       child.castShadow = true
       child.receiveShadow = true
     }
   })
 
+  let position = [0, width / 3, 0]
+  let scale = [width / 2, width / 2, depth / 2]
+  if (moduleId.includes("water_supply") || moduleId.includes("water_treatment")) {
+    position = [0, 0, 0]
+    scale = [width / 3, width / 4, depth / 3]
+  }
+  if (moduleId.includes("water_chiller")) {
+    position = [0, 0, 0]
+    scale = [width / 2, 5, depth / 2]
+  }
+
   return (
     <primitive
       object={obj.clone()}
-      position={[0, width / 3, 0]}
-      scale={[
-        width / 2,
-        width / 2,
-        depth / 2,
-      ]}
+      position={position}
+      scale={scale}
       castShadow
       receiveShadow
     />
@@ -79,10 +96,11 @@ export default function ModuleObject({
   const { module, position, rotation } = placedModule
 
   // Calculate dimensions based on rotation
-  const width = rotation % 180 === 0 ? module.dim[0] : module.dim[1]
-  const depth = rotation % 180 === 0 ? module.dim[1] : module.dim[0]
+  const rotated = rotation % 180 !== 0
+  const width = rotated ? module.dim[1] : module.dim[0]
+  const depth = rotated ? module.dim[0] : module.dim[1]
 
-  // Calculate position in the scene
+  // Center of the module in grid coordinates
   const x = position.x - gridWidth / 2 + width / 2
   const z = position.y - gridHeight / 2 + depth / 2
 
@@ -92,31 +110,30 @@ export default function ModuleObject({
 
   if (isPreview) {
     opacity = 0.5
-    color = isValidPlacement ? "#4CAF50" : "#F44336" // Green if valid, red if invalid
+    color = isValidPlacement ? "#4CAF50" : "#F44336"
   } else if (hovered) {
-    color = "#1a4d8c" // Lighter blue when hovered
+    color = "#1a4d8c"
   } else {
-    // Color based on module type
     switch (module.type) {
       case "transformer":
-        color = "#FFC107" // Yellow for power
+        color = "#FFC107"
         break
-      case "water_supply":
-      case "water_treatment":
-      case "water_chiller":
-        color = "#03A9F4" // Blue for water
+      case "water supply":
+      case "water treatment":
+      case "water chiller":
+        color = "#84e080"
         break
-      case "network_rack":
-        color = "#9C27B0" // Purple for network
+      case "network rack":
+        color = "#9C27B0"
         break
-      case "storage_rack":
-        color = "#FF5722" // Orange for storage
+      case "data rack":
+        color = "#FF5722"
         break
-      case "server_rack":
-        color = "#4CAF50" // Green for servers
+      case "server rack":
+        color = "#4CAF50"
         break
       default:
-        color = "#0e3e7b" // Default blue
+        color = "#0e3e7b"
     }
   }
 
@@ -146,7 +163,7 @@ export default function ModuleObject({
 
       {/* Module label */}
       <Text
-        position={[0, 0.6, depth / 2 - 0.2]} // In front of the box
+        position={[0, 0.6, depth / 2 - 0.2]}
         rotation={[-Math.PI / 2, 0, 0]}
         fontSize={0.7}
         color="#ffffff"
@@ -160,7 +177,7 @@ export default function ModuleObject({
       {/* Module details (only show when hovered and not a preview) */}
       {hovered && !isPreview && (
         <Text
-          position={[0, 2, 0]}
+          position={[0, 0.6, depth / 2 - 1]}
           rotation={[-Math.PI / 2, 0, 0]}
           fontSize={0.6}
           color="#88c0d0"
