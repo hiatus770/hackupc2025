@@ -67,3 +67,26 @@ class DatacenterSpec(BaseModel):
     class Config:
         from_attributes = True
         populate_by_name = True
+
+class PlacedModule(BaseModel) :
+  id: str
+  module: Module
+  class position: 
+    x: int
+    y: int
+  rotation: int 
+
+class DatacenterStyle(BaseModel):
+  id: str
+  name: str
+  description: str # a quick description 
+  grid_connection: int # how much grid connections it has 
+  water_connection: int  # how much water it has 
+  processing: int  # processing power of the server 
+  price: int  # the price of the server, if null we want to minimize 
+  class dim:
+    x: int
+    y: int
+  data_storage: int 
+  focus: str
+  recommended_modules: str[] # Array of module names
