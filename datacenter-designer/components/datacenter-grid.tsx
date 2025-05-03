@@ -122,6 +122,8 @@ export default function DatacenterGrid({
     return true
   }
 
+  console.log("Placed modules:", placedModules);
+
   return (
     <>
       {/* Grid outline */}
@@ -129,6 +131,16 @@ export default function DatacenterGrid({
         <planeGeometry args={[width, height]} />
         <meshBasicMaterial color="#012456" opacity={0.2} transparent />
       </mesh>
+      
+      {/* Directional light for strong shadows */}
+      <directionalLight
+        position={[10, 20, 10]}
+        intensity={1.2}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-bias={-0.0005}
+      />
 
       {/* Grid labels */}
       {Array.from({ length: width + 1 }).map((_, i) => (
@@ -140,13 +152,13 @@ export default function DatacenterGrid({
           fontSize={0.5}
           color="#88c0d0"
         >
-          {i*10}
+          {i * 10}
         </Text>
       ))}
 
       {Array.from({ length: height + 1 }).map((_, i) => (
-        
-          i % 10 === 0 && // Only show every 10th label
+
+        i % 10 === 0 && // Only show every 10th label
         <Text
           key={`y-${i}`}
           position={[-width / 2 - 0.5, 0.01, i - height / 2]}
@@ -154,9 +166,9 @@ export default function DatacenterGrid({
           fontSize={0.5}
           color="#88c0d0"
         >
-          {i*10}
+          {i * 10}
         </Text>
-        
+
       ))}
 
       {/* Placed modules */}
@@ -176,6 +188,7 @@ export default function DatacenterGrid({
         />
       ))}
 
+
       {/* Preview of module being placed */}
       {isPlacingModule && selectedModule && hoverPosition && (
         <ModuleObject
@@ -183,7 +196,7 @@ export default function DatacenterGrid({
             id: "preview",
             module: {
               ...selectedModule,
-dim: [selectedModule.dim[0] / 10, selectedModule.dim[1] / 10], // Scale down by 10x
+              dim: [selectedModule.dim[0] / 10, selectedModule.dim[1] / 10], // Scale down by 10x
             },
             position: hoverPosition,
             rotation,

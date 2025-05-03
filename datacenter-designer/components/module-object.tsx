@@ -1,7 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { Text } from "@react-three/drei"
+import { useLoader } from "@react-three/fiber"
+import { OBJLoader , MTLLoader} from "three-stdlib"
 import type { PlacedModule } from "@/types/datacenter"
 
 interface ModuleObjectProps {
@@ -11,6 +13,57 @@ interface ModuleObjectProps {
   isPreview?: boolean
   isValidPlacement?: boolean
   onRemove?: () => void
+}
+
+// Always call useLoader, let Suspense handle loading/failure
+function ModuleModel({ moduleId, width, depth, color }: { moduleId: string; width: number; depth: number; color: string }) {
+  let obj: any = null
+  try {
+    const materials = useLoader(MTLLoader, `/models/${moduleId}.mtl`)
+    obj = useLoader(OBJLoader, `/models/${moduleId}.obj`, loader => {
+      loader.setMaterials(materials)
+    })
+  } catch {
+    try {
+      obj = useLoader(OBJLoader, `/models/${moduleId}.obj`)
+    } catch {
+      obj = null
+    }
+  }
+
+  // If obj is null, render a fallback box
+  if (!obj) {
+    return (
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[width, 1, depth]} />
+        <meshStandardMaterial color={color} opacity={0.7} transparent />
+      </mesh>
+    )
+  }
+
+  // Force color on all meshes
+  obj.traverse?.((child: any) => {
+    if (child.isMesh) {
+      child.material = child.material.clone()
+      child.material.color.set(color)
+      child.castShadow = true
+      child.receiveShadow = true
+    }
+  })
+
+  return (
+    <primitive
+      object={obj.clone()}
+      position={[0, width / 3, 0]}
+      scale={[
+        width / 2,
+        width / 2,
+        depth / 2,
+      ]}
+      castShadow
+      receiveShadow
+    />
+  )
 }
 
 export default function ModuleObject({
@@ -86,11 +139,16 @@ export default function ModuleObject({
         <meshStandardMaterial color={color} opacity={opacity} transparent />
       </mesh>
 
+      {/* Render OBJ model if available */}
+      <Suspense fallback={null}>
+        <ModuleModel moduleId={module.id} width={width} depth={depth} color={color} />
+      </Suspense>
+
       {/* Module label */}
       <Text
-        position={[0, 0.6, 0]}
+        position={[0, 0.6, depth / 2 - 0.2]} // In front of the box
         rotation={[-Math.PI / 2, 0, 0]}
-        fontSize={0.4}
+        fontSize={0.7}
         color="#ffffff"
         anchorX="center"
         anchorY="middle"
@@ -102,17 +160,18 @@ export default function ModuleObject({
       {/* Module details (only show when hovered and not a preview) */}
       {hovered && !isPreview && (
         <Text
-          position={[0, 1.2, 0]}
+          position={[0, 2, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
-          fontSize={0.3}
+          fontSize={0.6}
           color="#88c0d0"
           anchorX="center"
           anchorY="middle"
           maxWidth={width - 0.2}
         >
-          {`${width}x${depth}m • $${module.price}`}
+          {`${width * 10}x${depth * 10}m • $${module.price}`}
         </Text>
       )}
     </group>
   )
 }
+

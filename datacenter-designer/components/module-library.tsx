@@ -117,7 +117,7 @@ export default function ModuleLibrary({ modules, onSelectModule, selectedModule,
                   >
                     <div className="font-medium">{module.id}</div>
                     <div className="text-sm text-[#88c0d0]">
-                      {module.dim[0]}x{module.dim[1]} • ${module.price}
+                      {module.dim[0]*10}x{module.dim[1]*10} • ${module.price}
                     </div>
                     <div className="text-xs mt-1 text-[#a9c4d4]">
                       {module.description || "No description available"}
