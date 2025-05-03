@@ -77,12 +77,32 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
     document.addEventListener('mouseup', stopResizing);
   };
 
+  // State to store the maximum sidebar width
+  const [maxSidebarWidth, setMaxSidebarWidth] = useState(300); // Default value
+
+  // Update the maximum sidebar width when the window size changes
+  useEffect(() => {
+    // Only access window after the component has been mounted
+    const updateMaxWidth = () => {
+      setMaxSidebarWidth(window.innerWidth * 0.3);
+    };
+
+    // Set the initial value
+    updateMaxWidth();
+
+    // Add event listener to update when window size changes
+    window.addEventListener('resize', updateMaxWidth);
+
+    // Cleanup when unmounting
+    return () => window.removeEventListener('resize', updateMaxWidth);
+  }, []);
+
+  // Modify the handleMouseMove function to use the maxSidebarWidth state
   const handleMouseMove = (e: MouseEvent) => {
     if (!resizingRef.current) return;
     const newWidth = e.clientX;
-    // Respect the established max-width (30vw)
-    const maxAllowedWidth = window.innerWidth * 0.3;
-    if (newWidth >= 300 && newWidth <= maxAllowedWidth) {
+    // Use the maxSidebarWidth state instead of calculating window.innerWidth * 0.3 directly
+    if (newWidth >= 300 && newWidth <= maxSidebarWidth) {
       setSidebarWidth(newWidth);
     }
   };
@@ -321,7 +341,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
           <div
             className="fixed right-auto top-[60px] w-2 bg-[#0e3e7b] cursor-ew-resize hover:bg-blue-500 z-50 h-[calc(100vh-60px)] pointer-events-auto"
             style={{
-              left: `${Math.min(sidebarWidth, window.innerWidth * 0.3)}px`
+              left: `${Math.min(sidebarWidth, maxSidebarWidth)}px`
             }}
             onMouseDown={startResizing}
           />
