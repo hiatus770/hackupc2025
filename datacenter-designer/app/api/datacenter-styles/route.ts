@@ -8,7 +8,7 @@ export async function GET() {
     {
       "id": "server_square",
       "name": "Server Squares",
-      "description": "Balanced mid-tier data center with decent processing and storage capabilities.",
+      "description": "Balanand ced mid-tier data center with decent processing and storage capabilities.",
       "grid_connection": 3,
       "water_connection": 1,
       "dim": [1000, 500],
@@ -23,7 +23,7 @@ export async function GET() {
       "description": "Optimized for maximum data storage with minimal space usage.",
       "grid_connection": -1,
       "water_connection": -1,
-      "dim": [-1, -1],
+      "dim": [1000, 1000],
       "data_storage": -1,
       "processing": null,
       "price": 5000000,
