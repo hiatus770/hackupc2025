@@ -9,6 +9,7 @@ import DatacenterGrid from "./datacenter-grid"
 import ModuleDetails from "./module-details"
 import type { DatacenterStyle, Module, PlacedModule } from "@/types/datacenter"
 import styles from "./datacenter-designer.module.css"
+import { set } from "date-fns"
 
 interface DatacenterDesignerProps {
   styleId: string
@@ -24,29 +25,43 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
   const [gridSize, setGridSize] = useState({ width: styleData.dim[0] / 10, height: styleData.dim[1] / 10 })
   console.log("Grid Size:", gridSize);
 
-  const [totalCost, setTotalCost] = useState(0); 
-  const [totalPower, setTotalPower] = useState(0); 
-  const [totalWater, setTotalWater] = useState(0); 
-  const [totalArea,  setTotalArea] = useState(0); 
-  
+  const [totalCost, setTotalCost] = useState(0);
+  const [totalPower, setTotalPower] = useState(0);
+  const [totalWater, setTotalWater] = useState(0);
+  const [totalArea, setTotalArea] = useState(0);
+  const [totalProcessing, setTotalProcessing] = useState(0);
+  const [totalStorage, setTotalStorage] = useState(0);
+  const [totalInternalWater, setTotalInternalWater] = useState(0);
+  const [totalInternalNetwork, setTotalInternalNetwork] = useState(0);
+  const [totalExternalNetwork, setTotalExternalNetwork] = useState(0);
+
   let goalArea = 0; // Total area of the datacenter
-  let goalWater = 0; 
-  let goalProcessing = 0; 
-  let goalNetwork = 0; 
-  let goalStorage = 0;  
+  let goalWater = 0;
+  let goalProcessing = 0;
+  let goalNetwork = 0;
+  let goalStorage = 0;
+  let targetPrice = 0;
 
   // Our goals are dependent on the style 
-  console.log("STYLE ID:", styleId); 
+  targetPrice = styleData.price ?? 0
+  console.log("STYLE ID:", styleId);
   if (styleId === "server_square") {
-    goalArea = 1000*500; 
-    
+    goalArea = 1000 * 500;
+    goalStorage = styleData.data_storage ?? 0
+    goalProcessing = styleData.processing ?? 0
+
 
   } else if (styleId === "dense_storage") {
-    
-  } else if (styleId === "supercomputer") {
+    // Maximize storage 
 
+
+  } else if (styleId === "supercomputer") {
+    // Maximize processing 
+    goalArea = 2000 * 1000;
+  } else {
+    // Custom 
   }
-  
+
   const [isPlacingModule, setIsPlacingModule] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(300);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -62,12 +77,32 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
     document.addEventListener('mouseup', stopResizing);
   };
 
+  // State to store the maximum sidebar width
+  const [maxSidebarWidth, setMaxSidebarWidth] = useState(300); // Default value
+
+  // Update the maximum sidebar width when the window size changes
+  useEffect(() => {
+    // Only access window after the component has been mounted
+    const updateMaxWidth = () => {
+      setMaxSidebarWidth(window.innerWidth * 0.3);
+    };
+
+    // Set the initial value
+    updateMaxWidth();
+
+    // Add event listener to update when window size changes
+    window.addEventListener('resize', updateMaxWidth);
+
+    // Cleanup when unmounting
+    return () => window.removeEventListener('resize', updateMaxWidth);
+  }, []);
+
+  // Modify the handleMouseMove function to use the maxSidebarWidth state
   const handleMouseMove = (e: MouseEvent) => {
     if (!resizingRef.current) return;
     const newWidth = e.clientX;
-    // Respetar el max-width establecido (30vw)
-    const maxAllowedWidth = window.innerWidth * 0.3;
-    if (newWidth >= 300 && newWidth <= maxAllowedWidth) {
+    // Use the maxSidebarWidth state instead of calculating window.innerWidth * 0.3 directly
+    if (newWidth >= 300 && newWidth <= maxSidebarWidth) {
       setSidebarWidth(newWidth);
     }
   };
@@ -91,7 +126,12 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
         setModules(modulesData)
         setDatacenterStyles(stylesData)
 
-        if (stylesData.length > 0) {
+        // Find and set the selected style based on the styleId passed as prop
+        const currentStyle = stylesData.find((style: DatacenterStyle) => style.id === styleId)
+        if (currentStyle) {
+          setSelectedStyle(currentStyle)
+        } else if (stylesData.length > 0) {
+          // Fallback in case the style is not found
           setSelectedStyle(stylesData[0])
         }
       } catch (error) {
@@ -100,35 +140,66 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
     }
 
     loadData()
-  }, [])
+  }, [styleId]) // Added styleId as a dependency to update if it changes
 
   // Calculate totals when placed modules change
   useEffect(() => {
     let cost = 0
     let power = 0
     let water = 0
+    let internalWater = 0
+    let internalNetwork = 0
+    let network = 0
+    let processing = 0
+    let storage = 0
+    let area = 0
+
 
     placedModules.forEach((placed) => {
       cost += placed.module.price || 0
       power += placed.module.usable_power || 0
-      water += placed.module.water_usage || 0
-
-      // // Add power supplied by transformers
-      // if (placed.module.usable_power) {
-      //   power -= placed.module.usable_power
-      // }
-
-      // // Add water supplied by water supply
-      // if (placed.module.supplied_water) {
-      //   water -= placed.module.supplied_water
-      // }
+      water += placed.module.fresh_water || 0
+      internalWater += placed.module.distilled_water || 0
+      network += placed.module.external_network || 0
+      internalNetwork += placed.module.internal_network || 0
+      processing += placed.module.processing || 0
+      storage += placed.module.data_storage || 0
+      area += (placed.module.dim[0]) * (placed.module.dim[1]) // Area in m^2
+      console.log("NETWORK:", placed.module.external_network, placed.module.internal_network);
     })
 
     setTotalCost(cost)
+    console.log("TOTALS: ", cost, power, water);
     setTotalPower(power)
+    setTotalProcessing(processing)
+    setTotalStorage(storage)
+    setTotalExternalNetwork(network)
+    setTotalInternalNetwork(internalNetwork)
+    setTotalInternalWater(internalWater)
     setTotalWater(water)
     console.log(cost, power, water);
   }, [placedModules])
+
+  // Add listener for the custom event
+  useEffect(() => {
+    const handleClearAllModules = () => {
+      // Clear all placed modules
+      setPlacedModules([]);
+      // Optionally, also update the metric calculations
+      setTotalCost(0);
+      setTotalPower(0);
+      setTotalWater(0);
+      setTotalArea(0);
+    };
+
+    // Register the listener
+    window.addEventListener('clearAllModules', handleClearAllModules);
+
+    // Clean up on unmount
+    return () => {
+      window.removeEventListener('clearAllModules', handleClearAllModules);
+    };
+  }, []);
 
   const handleModuleSelect = (module: Module) => {
     setSelectedModule(module)
@@ -227,14 +298,56 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
       <div className={styles.header}>
         <h1 className={styles.title}>Datacenter Designer</h1>
         <div className={styles.metrics}>
+          {/* Price Goal Comparison */}
           <div className={styles.metric}>
-            <span>Total Cost:</span> ${totalCost.toLocaleString()}
+            <span>Budget:</span>
+            {targetPrice > 0 ? ( // Only show if a target price is set
+              <span style={{ color: totalCost <= targetPrice ? 'lightgreen' : 'orange' }}>
+                ${(targetPrice - totalCost).toLocaleString()} {totalCost <= targetPrice ? 'Remaining' : 'Over'}
+              </span>
+            ) : (
+              <span>${totalCost.toLocaleString()} Spent</span> // Fallback if no target
+            )}
           </div>
+          {/* Power Balance (Existing) */}
           <div className={styles.metric}>
-            <span>Power Balance:</span> {totalPower < 0 ? `+${Math.abs(totalPower)}` : `-${totalPower}`} kW
+            <span>Power Balance:</span>
+            <span style={{ color: totalPower >= 0 ? 'lightgreen' : 'orange' }}>
+              {totalPower >= 0 ? `+${Math.abs(totalPower).toLocaleString()}` : `${totalPower.toLocaleString()}`} kW
+            </span>
+            {/* Optionally add goal comparison if a 'totalProcessing' state exists and 'goalProcessing' is the target */}
+            {/* {goalProcessing > 0 && <span> (Goal: {goalProcessing})</span>} */}
           </div>
+          {/* Water Balance (Existing) */}
           <div className={styles.metric}>
-            <span>Water Balance:</span> {totalWater < 0 ? `+${Math.abs(totalWater)}` : `-${totalWater}`} kL
+            <span>Water Balance:</span>
+            <span style={{ color: totalWater >= 0 ? 'lightblue' : 'yellow' }}>
+              {totalWater >= 0 ? `+${Math.abs(totalWater).toLocaleString()}` : `${totalWater.toLocaleString()}`} kL
+            </span>
+            {/* Optionally add goal comparison if 'goalWater' is a target limit/requirement */}
+            {/* {goalWater > 0 && <span> (Limit: {goalWater})</span>} */}
+          </div>
+          {/* Networking Goal Comparison (Assuming 'totalNetwork' state exists or using 0 as placeholder) */}
+          <div className={styles.metric}>
+            <span>Networking:</span>
+            {goalNetwork > 0 ? ( // Only show if a network goal is set
+              <span style={{ color: totalExternalNetwork >= goalNetwork ? 'lightgreen' : 'orange' }}>
+                {(totalExternalNetwork - goalNetwork).toLocaleString()} {totalExternalNetwork >= goalNetwork ? 'Above Goal' : 'Below Goal'}
+              </span>
+            ) : (
+              <span>{totalExternalNetwork.toLocaleString()} kBps</span> // Fallback if no goal
+            )}
+          </div>
+          {/* Processing Goal Comparison */}
+          <div className={styles.metric}>
+            <span>Processing:</span>
+            {goalProcessing > 0 ? ( // Only show if a target processing is set
+              <span style={{ color: totalProcessing >= goalProcessing ? 'lightgreen' : 'orange' }}>
+                {totalProcessing.toLocaleString()} {totalProcessing >= goalProcessing ? 'Above Goal' : 'Below Goal'}
+              </span>
+            ) : (
+              <span>{totalProcessing.toLocaleString()} kW</span> // Fallback if no target
+            )}
           </div>
         </div>
       </div>
@@ -245,11 +358,11 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
           style={{ width: `${sidebarWidth}px`, minWidth: '300px', maxWidth: '30vw', flexShrink: 0, position: 'relative' }}
           className={`bg-[#01193d] border-r border-[#0e3e7b] flex flex-col h-[calc(100vh-60px)] overflow-auto ${styles.hideScrollbar}`}
         >
-          {/* Divisor para redimensionar que ocupa toda la altura */}
+          {/* Divider for resizing that spans the full height */}
           <div
             className="fixed right-auto top-[60px] w-2 bg-[#0e3e7b] cursor-ew-resize hover:bg-blue-500 z-50 h-[calc(100vh-60px)] pointer-events-auto"
             style={{
-              left: `${Math.min(sidebarWidth, window.innerWidth * 0.3)}px`
+              left: `${Math.min(sidebarWidth, maxSidebarWidth)}px`
             }}
             onMouseDown={startResizing}
           />
@@ -276,6 +389,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
             onStyleChange={handleStyleChange}
             gridSize={gridSize}
             onGridSizeChange={handleGridSizeChange}
+            placedModules={placedModules} // Pass placed modules as prop
           />
         </div>
 
