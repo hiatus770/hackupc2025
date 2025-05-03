@@ -87,72 +87,40 @@ async def import_modules(import_request: ModuleImportRequest):
 async def import_modules_json(import_request: JSONModuleImportRequest):
     """
     Import modules from JSON data.
-    Expects a list of modules in the modern format.
+    Preserves the exact structure of the input data without any transformations.
     """
     try:
         if not import_request.modules:
             raise HTTPException(status_code=400, detail="No modules found in the request")
 
-        # Convert modules to database format
+        # Convert modules to raw dictionaries without any transformation
         modules_to_insert = []
         for module in import_request.modules:
-            module_dict = module.dict()
+            # Get the raw dict from the pydantic model
+            module_dict = module.dict(exclude_unset=True)
 
-            # Create DB compatible format
-            db_module = {
-                "ID": module_dict["id"],
-                "Name": f"{module_dict['type'].replace(' ', '_').capitalize()}_{module_dict.get('usable_power', '') or module_dict.get('fresh_water', '') or module_dict.get('chilled_water', '') or module_dict.get('internal_network', '') or module_dict.get('data_storage', '')}",
-                "Space_X": module_dict["dim"][0],
-                "Space_Y": module_dict["dim"][1],
-                "Price": module_dict["price"]
-            }
+            # No transformation, just insert as is
+            modules_to_insert.append(module_dict)
 
-            # Process resource fields - positive values are outputs, negative are inputs
-            resource_mappings = {
-                "usable_power": "Usable_Power",
-                "grid_connection": "Grid_Connection",
-                "water_connection": "Water_Connection",
-                "fresh_water": "Fresh_Water",
-                "distilled_water": "Distilled_Water",
-                "chilled_water": "Chilled_Water",
-                "internal_network": "Internal_Network",
-                "external_network": "External_Network",
-                "processing": "Processing",
-                "data_storage": "Data_Storage"
-            }
-
-            for json_field, db_field in resource_mappings.items():
-                if json_field in module_dict and module_dict[json_field] is not None:
-                    db_module[db_field] = module_dict[json_field]
-
-                    # Add input/output flags based on resource value
-                    value = module_dict[json_field]
-                    if json_field == "grid_connection" or json_field == "water_connection":
-                        # Connection fields are always inputs
-                        db_module["Is_Input"] = 1
-                        db_module["Is_Output"] = 0
-                        db_module["Unit"] = json_field.replace("_", " ").capitalize()
-                    else:
-                        # Resource fields: positive = output, negative = input
-                        if value > 0:
-                            db_module["Is_Input"] = 0
-                            db_module["Is_Output"] = 1
-                        else:
-                            db_module["Is_Input"] = 1
-                            db_module["Is_Output"] = 0
-                        db_module["Unit"] = json_field.replace("_", " ").capitalize()
-                        db_module["Amount"] = abs(value)
-
-            modules_to_insert.append(db_module)
-
-        # Insert modules
+        # Insert modules directly
         result = modules_collection.insert_many(modules_to_insert)
 
-        # Get the inserted modules
+        # Get the inserted modules for confirmation
         inserted_ids = [str(id) for id in result.inserted_ids]
+        inserted_modules = []
+
+        for id in inserted_ids:
+            if ObjectId.is_valid(id):
+                module = modules_collection.find_one({"_id": ObjectId(id)})
+                if module:
+                    # Convert ObjectId to string for JSON serialization
+                    module["_id"] = str(module["_id"])
+                    inserted_modules.append(module)
+
         return {
             "message": f"Successfully imported {len(inserted_ids)} modules",
-            "imported_count": len(inserted_ids)
+            "imported_count": len(inserted_ids),
+            "modules": inserted_modules
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error importing modules: {str(e)}")

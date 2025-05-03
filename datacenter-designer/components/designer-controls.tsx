@@ -15,6 +15,7 @@ interface DesignerControlsProps {
   gridSize: { width: number; height: number }
   onGridSizeChange: (width: number, height: number) => void
   placedModules: any[] // Add placedModules as prop
+  onLoadDesign: (designData: any) => void; // Add this new prop
 }
 
 export default function DesignerControls({
@@ -24,6 +25,7 @@ export default function DesignerControls({
   gridSize,
   onGridSizeChange,
   placedModules, // Add placedModules to destructuring
+  onLoadDesign, // Add the new prop here
 }: DesignerControlsProps) {
   const [width, setWidth] = useState(gridSize.width)
   const [height, setHeight] = useState(gridSize.height)
@@ -89,8 +91,45 @@ export default function DesignerControls({
   }
 
   const handleLoadDesign = () => {
-    // Implement load functionality
-    alert("Load functionality would be implemented here")
+    // Create a hidden file input to select the file
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const designData = JSON.parse(e.target?.result as string);
+          if (!designData || !designData.modules) {
+            alert("Invalid file format");
+            return;
+          }
+
+          // Check if we need to change page first
+          if (designData.styleId && designData.styleId !== selectedStyle?.id) {
+            // Temporarily store the design in localStorage to retrieve it after redirection
+            localStorage.setItem('pendingDesignData', JSON.stringify(designData));
+
+            // Redirect to the corresponding style page
+            router.push(`/designer/${encodeURIComponent(designData.styleId)}`);
+          } else {
+            // If we don't need to change the style, load directly
+            onLoadDesign(designData);
+          }
+        } catch (error) {
+          console.error("Error parsing JSON file:", error);
+          alert("Error loading design: Invalid format");
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    // Trigger the click on the input
+    input.click();
   }
 
   // Add function to clear the design

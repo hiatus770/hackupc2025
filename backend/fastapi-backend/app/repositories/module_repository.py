@@ -1,6 +1,7 @@
 from bson import ObjectId
 from DB.cliente import get_database
 from app.models.schemas import Module
+from typing import List, Optional
 
 class ModuleRepository:
     def __init__(self):
@@ -11,8 +12,30 @@ class ModuleRepository:
         result = self.collection.insert_one(module)
         return str(result.inserted_id)
 
-    def get_by_id(self, id: str):
-        return self.collection.find_one({"_id": ObjectId(id)})
+    def get_by_id(self, id: str) -> Optional[dict]:
+        """Get a module by ID"""
+        # First try by string ID (most likely for frontend-provided IDs)
+        module = self.collection.find_one({"id": id})
+        if module:
+            return module
+
+        # Try with a case-insensitive search (for robustness)
+        module = self.collection.find_one({"id": {"$regex": f"^{id}$", "$options": "i"}})
+        if module:
+            return module
+
+        # Try as ObjectId (for MongoDB's _id field)
+        if ObjectId.is_valid(id):
+            module = self.collection.find_one({"_id": ObjectId(id)})
+            if module:
+                return module
+
+        # Try legacy ID field
+        module = self.collection.find_one({"ID": id})
+        if module:
+            return module
+
+        return None
 
     def get_all(self):
         return list(self.collection.find())

@@ -134,6 +134,18 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
           // Fallback in case the style is not found
           setSelectedStyle(stylesData[0])
         }
+
+        // Check if there is a pending design in localStorage
+        const pendingDesignData = localStorage.getItem('pendingDesignData');
+        if (pendingDesignData) {
+          // Remove from localStorage to avoid duplicate loads
+          localStorage.removeItem('pendingDesignData');
+
+          // Wait a moment to ensure that modules and styles have been loaded
+          setTimeout(() => {
+            handleLoadDesign(JSON.parse(pendingDesignData));
+          }, 500);
+        }
       } catch (error) {
         console.error("Failed to load datacenter data:", error)
       }
@@ -293,6 +305,96 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
     }
   }
 
+  // Function to load a design from a JSON file
+  const handleLoadDesign = async (designData: any) => {
+    try {
+      // If the style is different from the current one, we change the style
+      if (designData.styleId && designData.styleId !== selectedStyle?.id) {
+        // Search for the style in the list of available styles
+        const newStyle = datacenterStyles.find(style => style.id === designData.styleId);
+        if (newStyle) {
+          setSelectedStyle(newStyle);
+          // If we wanted to change the URL we could also do it like this:
+          // router.push(`/designer/${encodeURIComponent(designData.styleId)}`);
+        } else {
+          console.warn(`Style '${designData.styleId}' not found. Keeping the current style.`);
+        }
+      }
+
+      // If there are no modules to load, we end here
+      if (!designData.modules || !Array.isArray(designData.modules) || designData.modules.length === 0) {
+        console.warn("There are no modules to load in the design.");
+        return;
+      }
+
+      // Get the modules from the API if they have not been loaded yet
+      let moduleDefinitions = modules;
+      if (moduleDefinitions.length === 0) {
+        const response = await fetch("/api/modules");
+        moduleDefinitions = await response.json();
+        setModules(moduleDefinitions);
+      }
+
+      // Map the design modules to the actual modules
+      const newPlacedModules: PlacedModule[] = [];
+
+      for (const placedModuleData of designData.modules) {
+        // Search for the corresponding module by ID
+        const moduleDefinition = moduleDefinitions.find(m => m.id === placedModuleData.id);
+
+        if (moduleDefinition) {
+          // Create a new PlacedModule object with the combined data
+          const placedModule: PlacedModule = {
+            id: `${placedModuleData.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Unique ID
+            module: moduleDefinition,
+            position: placedModuleData.position,
+            rotation: placedModuleData.rotation || 0
+          };
+
+          newPlacedModules.push(placedModule);
+        } else {
+          console.warn(`Module '${placedModuleData.id}' not found in the module library.`);
+        }
+      }
+
+      // Replace the current placed modules with the new ones
+      setPlacedModules(newPlacedModules);
+
+      // Recalculate the total metrics
+      let cost = 0;
+      let power = 0;
+      let water = 0;
+      let area = 0;
+
+      newPlacedModules.forEach((placed) => {
+        cost += placed.module.price || 0;
+        power += placed.module.usable_power || 0;
+
+        // Calculate water (use the first available value)
+        const waterValue = placed.module.fresh_water ||
+          placed.module.distilled_water ||
+          placed.module.chilled_water || 0;
+        water += waterValue;
+
+        // Calculate area
+        const moduleWidth = placed.rotation % 180 === 0 ? placed.module.dim[0] : placed.module.dim[1];
+        const moduleHeight = placed.rotation % 180 === 0 ? placed.module.dim[1] : placed.module.dim[0];
+        area += (moduleWidth * moduleHeight);
+      });
+
+      setTotalCost(cost);
+      setTotalPower(power);
+      setTotalWater(water);
+      setTotalArea(area);
+
+      console.log(`Design loaded successfully: ${newPlacedModules.length} modules placed.`);
+
+    } catch (error) {
+      console.error("Error loading the design:", error);
+      alert("Error loading the design. Please check the file.");
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -389,7 +491,8 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
             onStyleChange={handleStyleChange}
             gridSize={gridSize}
             onGridSizeChange={handleGridSizeChange}
-            placedModules={placedModules} // Pass placed modules as prop
+            placedModules={placedModules}
+            onLoadDesign={handleLoadDesign} // Add the onLoadDesign prop
           />
         </div>
 
