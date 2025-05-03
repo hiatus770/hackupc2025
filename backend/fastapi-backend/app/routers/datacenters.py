@@ -6,7 +6,7 @@ from app.repositories.datacenter_repository import DatacenterRepository
 from app.repositories.placed_module_repository import PlacedModuleRepository
 from app.repositories.module_repository import ModuleRepository
 from app.repositories.datacenter_style_repository import DatacenterStyleRepository
-from DB.esquemas.esquema_datacenters import datacenter_esquema, datacenters_esquema
+from DB.esquemas.esquema_datacenters import datacenter_esquema, datacenters_esquema, datacenter_esquema_minimal, datacenters_esquema_minimal
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -55,24 +55,31 @@ class DatacenterCreateSimple(BaseModel):
     modules: List[ModulePosition] = []
 
 @router.get("/", response_description="List all datacenters")
-async def list_datacenters(include_modules: bool = False, limit: int = 100, skip: int = 0):
+async def list_datacenters(include_modules: bool = False, minimal: bool = True, limit: int = 100, skip: int = 0):
     """
     Get all datacenters with pagination.
 
     - **include_modules**: Whether to include placed modules in the response
+    - **minimal**: Return only essential datacenter information
     - **limit**: Maximum number of datacenters to return
     - **skip**: Number of datacenters to skip
     """
     try:
-        datacenters = datacenter_repo.get_all(include_modules)
+        datacenters = datacenter_repo.get_all(include_modules if not minimal else False)
 
         # Apply pagination
         paginated = datacenters[skip:skip + limit]
 
-        return {
-            "total": len(datacenters),
-            "datacenters": datacenters_esquema(paginated)
-        }
+        if minimal:
+            return {
+                "total": len(datacenters),
+                "datacenters": datacenters_esquema_minimal(paginated)
+            }
+        else:
+            return {
+                "total": len(datacenters),
+                "datacenters": datacenters_esquema(paginated)
+            }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving datacenters: {str(e)}")
 
