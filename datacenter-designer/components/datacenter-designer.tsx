@@ -77,24 +77,25 @@ export default function DatacenterDesigner() {
     let water = 0
 
     placedModules.forEach((placed) => {
-      cost += placed.module.cost || 0
-      power += placed.module.power_usage || 0
+      cost += placed.module.price || 0
+      power += placed.module.usable_power || 0
       water += placed.module.water_usage || 0
 
-      // Add power supplied by transformers
-      if (placed.module.supplied_power) {
-        power -= placed.module.supplied_power
-      }
+      // // Add power supplied by transformers
+      // if (placed.module.usable_power) {
+      //   power -= placed.module.usable_power
+      // }
 
-      // Add water supplied by water supply
-      if (placed.module.supplied_water) {
-        water -= placed.module.supplied_water
-      }
+      // // Add water supplied by water supply
+      // if (placed.module.supplied_water) {
+      //   water -= placed.module.supplied_water
+      // }
     })
 
     setTotalCost(cost)
     setTotalPower(power)
     setTotalWater(water)
+    console.log(cost, power, water); 
   }, [placedModules])
 
   const handleModuleSelect = (module: Module) => {
@@ -107,8 +108,9 @@ export default function DatacenterDesigner() {
 
     // Check if placement is valid (not overlapping other modules)
     const isValid = checkPlacementValidity(x, y, selectedModule, rotation)
-
+    console.log("Placing!"); 
     if (isValid) {
+      console.log("Placing"); 
       const newPlacedModule: PlacedModule = {
         id: `${Date.now()}`,
         module: selectedModule,
@@ -122,26 +124,28 @@ export default function DatacenterDesigner() {
   }
 
   const checkPlacementValidity = (x: number, y: number, module: Module, rotation: number): boolean => {
-    // Get module dimensions, accounting for rotation
-    const width = rotation % 180 === 0 ? module.dim[0] : module.dim[1]
-    const height = rotation % 180 === 0 ? module.dim[1] : module.dim[0]
+    if (!module) return false
+
+    // Get module dimensions, accounting for rotation, scaled down by 10x
+    const moduleWidth = rotation % 180 === 0 ? module.dim[0] / 10 : module.dim[1] / 10
+    const moduleHeight = rotation % 180 === 0 ? module.dim[1] / 10 : module.dim[0] / 10
 
     // Check if module is within grid bounds
-    if (x < 0 || y < 0 || x + width > gridSize.width || y + height > gridSize.height) {
+    if (x < 0 || y < 0 || x + moduleWidth > gridSize.width || y + moduleHeight > gridSize.height) {
       return false
     }
 
     // Check for overlaps with existing modules
     for (const placed of placedModules) {
-      const placedWidth = placed.rotation % 180 === 0 ? placed.module.dim[0] : placed.module.dim[1]
-      const placedHeight = placed.rotation % 180 === 0 ? placed.module.dim[1] : placed.module.dim[0]
+      const placedWidth = placed.rotation % 180 === 0 ? placed.module.dim[0] / 10 : placed.module.dim[1] / 10
+      const placedHeight = placed.rotation % 180 === 0 ? placed.module.dim[1] / 10 : placed.module.dim[0] / 10
 
       // Check for overlap
       if (
         x < placed.position.x + placedWidth &&
-        x + width > placed.position.x &&
+        x + moduleWidth > placed.position.x &&
         y < placed.position.y + placedHeight &&
-        y + height > placed.position.y
+        y + moduleHeight > placed.position.y
       ) {
         return false
       }
@@ -149,6 +153,7 @@ export default function DatacenterDesigner() {
 
     return true
   }
+
 
   const handleRemoveModule = (id: string) => {
     setPlacedModules(placedModules.filter((module) => module.id !== id))
@@ -163,8 +168,8 @@ export default function DatacenterDesigner() {
     setGridSize({ width, height })
     // Validate existing placements with new grid size
     const validPlacements = placedModules.filter((placed) => {
-      const placedWidth = placed.rotation % 180 === 0 ? placed.module.dim[0] : placed.module.dim[1]
-      const placedHeight = placed.rotation % 180 === 0 ? placed.module.dim[1] : placed.module.dim[0]
+      const placedWidth = placed.rotation % 180 === 0 ? placed.module.dim[0]/10 : placed.module.dim[1]/10
+      const placedHeight = placed.rotation % 180 === 0 ? placed.module.dim[1]/10 : placed.module.dim[0]/10
 
       return placed.position.x + placedWidth <= width && placed.position.y + placedHeight <= height
     })
