@@ -10,13 +10,19 @@ import ModuleDetails from "./module-details"
 import type { DatacenterStyle, Module, PlacedModule } from "@/types/datacenter"
 import styles from "./datacenter-designer.module.css"
 
-export default function DatacenterDesigner() {
+interface DatacenterDesignerProps {
+  styleId: string 
+  // Now allow the passing of the entire json style object
+  styleData: DatacenterStyle
+}
+export default function DatacenterDesigner({ styleId, styleData }: DatacenterDesignerProps) {
   const [modules, setModules] = useState<Module[]>([])
   const [datacenterStyles, setDatacenterStyles] = useState<DatacenterStyle[]>([])
   const [selectedStyle, setSelectedStyle] = useState<DatacenterStyle | null>(null)
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
   const [placedModules, setPlacedModules] = useState<PlacedModule[]>([])
-  const [gridSize, setGridSize] = useState({ width: 20, height: 20 })
+  const [gridSize, setGridSize] = useState({ width: styleData.dim[0]/10 , height: styleData.dim[1]/10 })
+  console.log("Grid Size:", gridSize);
   const [totalCost, setTotalCost] = useState(0)
   const [totalPower, setTotalPower] = useState(0)
   const [totalWater, setTotalWater] = useState(0)
@@ -24,6 +30,9 @@ export default function DatacenterDesigner() {
   const [sidebarWidth, setSidebarWidth] = useState(300);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const resizingRef = useRef(false);
+
+  // Orbit controls ref 
+  const orbitControlsRef = useRef<any>(null);
 
   const startResizing = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -177,6 +186,19 @@ export default function DatacenterDesigner() {
     setPlacedModules(validPlacements)
   }
 
+  // This will take a current layout and fetch the backend to generate a new layout that will be applied once it receives the rquest
+  const genFunction = () => {
+    // Implement the generation logic here
+    alert("Generation functionality would be implemented here")
+  }
+
+  const resetCameraView = () => {
+    // Implement the camera reset logic here
+    if (orbitControlsRef.current) {
+      orbitControlsRef.current.reset()
+    }
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -239,19 +261,34 @@ export default function DatacenterDesigner() {
               isPlacingModule={isPlacingModule}
               selectedModule={selectedModule}
             />
-            <OrbitControls minPolarAngle={0} maxPolarAngle={Math.PI / 2.1} enableZoom={true} enablePan={true} />
+            <OrbitControls 
+              ref={orbitControlsRef}
+              minPolarAngle={0} 
+              maxPolarAngle={Math.PI / 2.1} 
+              enableZoom={true} 
+              enablePan={true} 
+              minDistance={10}
+              maxDistance={1000}
+              panSpeed={2}
+            />
             <Grid
-              infiniteGrid
+              infiniteGrid={false}
+              position={[0, -0.01, 0]}
+              args={[gridSize.width, gridSize.height]}
               cellSize={1}
               cellThickness={0.5}
               cellColor="#6080ff"
               sectionSize={5}
               sectionThickness={1}
               sectionColor="#8090ff"
-              fadeDistance={50}
+              fadeDistance={1000}
               fadeStrength={1.5}
+
             />
           </Canvas>
+
+
+
         </div>
       </div>
     </div>

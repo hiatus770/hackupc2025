@@ -74,7 +74,7 @@ export default function DesignerControls({
             </SelectTrigger>
             <SelectContent className="bg-[#011845] border-[#0e3e7b]">
               {datacenterStyles.map((style) => (
-                <SelectItem key={style.id} value={style.id}>
+                <SelectItem key={style.id} value={style.id} className="bg-primary text-[#88c0d0] hover:bg-[#0a2d5e]">
                   {style.name}
                 </SelectItem>
               ))}
@@ -84,7 +84,7 @@ export default function DesignerControls({
           {selectedStyle && <p className="text-xs mt-1 text-[#a9c4d4]">{selectedStyle.description}</p>}
         </div>
 
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <div className="flex justify-between items-center">
             <label className="text-sm text-[#88c0d0]">Grid Width</label>
             <span className="text-sm">{width}m</span>
@@ -98,7 +98,7 @@ export default function DesignerControls({
             <span className="text-sm">{height}m</span>
           </div>
           <Slider value={[height]} min={10} max={50} step={1} onValueChange={handleHeightChange} className="py-2" />
-        </div>
+        </div> */}
 
         <div className="grid grid-cols-2 gap-2 pt-2">
           <Button
