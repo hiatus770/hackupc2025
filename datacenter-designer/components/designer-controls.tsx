@@ -74,7 +74,7 @@ export default function DesignerControls({
             </SelectTrigger>
             <SelectContent className="bg-[#011845] border-[#0e3e7b]">
               {datacenterStyles.map((style) => (
-                <SelectItem key={style.id} value={style.id}>
+                <SelectItem key={style.id} value={style.id} className="bg-primary text-[#88c0d0] hover:bg-[#0a2d5e]">
                   {style.name}
                 </SelectItem>
               ))}
