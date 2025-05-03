@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation" // Import the Next.js router
 import type { DatacenterStyle } from "@/types/datacenter"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
@@ -13,6 +14,7 @@ interface DesignerControlsProps {
   onStyleChange: (style: DatacenterStyle) => void
   gridSize: { width: number; height: number }
   onGridSizeChange: (width: number, height: number) => void
+  placedModules: any[] // Add placedModules as prop
 }
 
 export default function DesignerControls({
@@ -21,9 +23,17 @@ export default function DesignerControls({
   onStyleChange,
   gridSize,
   onGridSizeChange,
+  placedModules, // Add placedModules to destructuring
 }: DesignerControlsProps) {
   const [width, setWidth] = useState(gridSize.width)
   const [height, setHeight] = useState(gridSize.height)
+  const router = useRouter() // Initialize the router
+
+  // Update local states when props change
+  useEffect(() => {
+    setWidth(gridSize.width);
+    setHeight(gridSize.height);
+  }, [gridSize]);
 
   const handleWidthChange = (value: number[]) => {
     const newWidth = value[0]
@@ -40,13 +50,42 @@ export default function DesignerControls({
   const handleStyleSelect = (value: string) => {
     const style = datacenterStyles.find((s) => s.id === value)
     if (style) {
-      onStyleChange(style)
+      // Instead of just calling onStyleChange, navigate to the corresponding page
+      router.push(`/designer/${encodeURIComponent(style.id)}`)
     }
   }
 
   const handleSaveDesign = () => {
-    // Implement save functionality
-    alert("Save functionality would be implemented here")
+    // Create object to export with simplified format
+    const modules = placedModules.map(pm => ({
+      id: pm.module.id,
+      position: pm.position,
+      rotation: pm.rotation
+    }));
+
+    const designData = {
+      styleId: selectedStyle?.id,
+      modules
+    }
+
+    // Convert to JSON and prepare for download
+    const dataStr = JSON.stringify(designData, null, 2)
+    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr)
+
+    // Create download element
+    const exportName = `datacenter_design_${selectedStyle?.id || 'custom'}_${new Date().toISOString().slice(0, 10)}.json`
+
+    const a = document.createElement('a')
+    a.href = dataUri
+    a.download = exportName
+
+    // Trigger click to start download
+    document.body.appendChild(a)
+    a.click()
+
+    // Cleanup
+    document.body.removeChild(a)
+    URL.revokeObjectURL(dataUri)
   }
 
   const handleLoadDesign = () => {
@@ -68,13 +107,21 @@ export default function DesignerControls({
       <div className="space-y-6">
         <div className="space-y-2">
           <label className="text-sm text-[#88c0d0]">Datacenter Style</label>
-          <Select value={selectedStyle?.id || ""} onValueChange={handleStyleSelect}>
+          <Select
+            value={selectedStyle?.id || ""}
+            onValueChange={handleStyleSelect}
+            defaultValue={selectedStyle?.id}
+          >
             <SelectTrigger className="bg-[#011845] border-[#0e3e7b]">
               <SelectValue placeholder="Select a style" />
             </SelectTrigger>
             <SelectContent className="bg-[#011845] border-[#0e3e7b]">
               {datacenterStyles.map((style) => (
-                <SelectItem key={style.id} value={style.id} className="bg-primary text-[#88c0d0] hover:bg-[#0a2d5e]">
+                <SelectItem
+                  key={style.id}
+                  value={style.id}
+                  className="bg-primary text-[#88c0d0] hover:bg-[#0a2d5e]"
+                >
                   {style.name}
                 </SelectItem>
               ))}

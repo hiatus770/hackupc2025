@@ -24,29 +24,29 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
   const [gridSize, setGridSize] = useState({ width: styleData.dim[0] / 10, height: styleData.dim[1] / 10 })
   console.log("Grid Size:", gridSize);
 
-  const [totalCost, setTotalCost] = useState(0); 
-  const [totalPower, setTotalPower] = useState(0); 
-  const [totalWater, setTotalWater] = useState(0); 
-  const [totalArea,  setTotalArea] = useState(0); 
-  
+  const [totalCost, setTotalCost] = useState(0);
+  const [totalPower, setTotalPower] = useState(0);
+  const [totalWater, setTotalWater] = useState(0);
+  const [totalArea, setTotalArea] = useState(0);
+
   let goalArea = 0; // Total area of the datacenter
-  let goalWater = 0; 
-  let goalProcessing = 0; 
-  let goalNetwork = 0; 
-  let goalStorage = 0;  
+  let goalWater = 0;
+  let goalProcessing = 0;
+  let goalNetwork = 0;
+  let goalStorage = 0;
 
   // Our goals are dependent on the style 
-  console.log("STYLE ID:", styleId); 
+  console.log("STYLE ID:", styleId);
   if (styleId === "server_square") {
-    goalArea = 1000*500; 
-    
+    goalArea = 1000 * 500;
+
 
   } else if (styleId === "dense_storage") {
-    
+
   } else if (styleId === "supercomputer") {
 
   }
-  
+
   const [isPlacingModule, setIsPlacingModule] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(300);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -65,7 +65,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
   const handleMouseMove = (e: MouseEvent) => {
     if (!resizingRef.current) return;
     const newWidth = e.clientX;
-    // Respetar el max-width establecido (30vw)
+    // Respect the established max-width (30vw)
     const maxAllowedWidth = window.innerWidth * 0.3;
     if (newWidth >= 300 && newWidth <= maxAllowedWidth) {
       setSidebarWidth(newWidth);
@@ -91,7 +91,12 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
         setModules(modulesData)
         setDatacenterStyles(stylesData)
 
-        if (stylesData.length > 0) {
+        // Find and set the selected style based on the styleId passed as prop
+        const currentStyle = stylesData.find((style: DatacenterStyle) => style.id === styleId)
+        if (currentStyle) {
+          setSelectedStyle(currentStyle)
+        } else if (stylesData.length > 0) {
+          // Fallback in case the style is not found
           setSelectedStyle(stylesData[0])
         }
       } catch (error) {
@@ -100,7 +105,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
     }
 
     loadData()
-  }, [])
+  }, [styleId]) // Added styleId as a dependency to update if it changes
 
   // Calculate totals when placed modules change
   useEffect(() => {
@@ -245,7 +250,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
           style={{ width: `${sidebarWidth}px`, minWidth: '300px', maxWidth: '30vw', flexShrink: 0, position: 'relative' }}
           className={`bg-[#01193d] border-r border-[#0e3e7b] flex flex-col h-[calc(100vh-60px)] overflow-auto ${styles.hideScrollbar}`}
         >
-          {/* Divisor para redimensionar que ocupa toda la altura */}
+          {/* Divider for resizing that spans the full height */}
           <div
             className="fixed right-auto top-[60px] w-2 bg-[#0e3e7b] cursor-ew-resize hover:bg-blue-500 z-50 h-[calc(100vh-60px)] pointer-events-auto"
             style={{
@@ -276,6 +281,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
             onStyleChange={handleStyleChange}
             gridSize={gridSize}
             onGridSizeChange={handleGridSizeChange}
+            placedModules={placedModules} // Pass placed modules as prop
           />
         </div>
 
