@@ -52,17 +52,19 @@ export default function ModuleLibrary({ modules, onSelectModule, selectedModule 
       </div>
 
       <Tabs defaultValue={categories[0] || "all"}>
-        <TabsList className="w-full bg-[#011845] border border-[#0e3e7b]">
-          {categories.map((category) => (
-            <TabsTrigger
-              key={category}
-              value={category}
-              className="data-[state=active]:bg-[#0e3e7b] data-[state=active]:text-white"
-            >
-              {category}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <ScrollArea className="w-full pb-2" orientation="horizontal" scrollHideDelay={0} type="scroll">
+          <TabsList className="w-max bg-[#011845] border border-[#0e3e7b] flex-nowrap inline-flex">
+            {categories.map((category) => (
+              <TabsTrigger
+                key={category}
+                value={category}
+                className="data-[state=active]:bg-[#0e3e7b] data-[state=active]:text-white whitespace-nowrap"
+              >
+                {category}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </ScrollArea>
 
         {categories.map((category) => (
           <TabsContent key={category} value={category} className="mt-2 flex-1 overflow-hidden">
@@ -71,11 +73,10 @@ export default function ModuleLibrary({ modules, onSelectModule, selectedModule 
                 {filterModules(groupedModules[category]).map((module) => (
                   <div
                     key={module.name}
-                    className={`p-3 border rounded cursor-pointer transition-colors ${
-                      selectedModule?.name === module.name
-                        ? "bg-[#0e3e7b] border-[#88c0d0]"
-                        : "bg-[#011845] border-[#0e3e7b] hover:bg-[#0a2d5e]"
-                    }`}
+                    className={`p-3 border rounded cursor-pointer transition-colors ${selectedModule?.name === module.name
+                      ? "bg-[#0e3e7b] border-[#88c0d0]"
+                      : "bg-[#011845] border-[#0e3e7b] hover:bg-[#0a2d5e]"
+                      }`}
                     onClick={() => onSelectModule(module)}
                   >
                     <div className="font-medium">{module.name}</div>
