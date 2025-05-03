@@ -32,7 +32,13 @@ export interface PlacedModule {
 export interface DatacenterStyle {
   id: string
   name: string
-  description: string
-  focus: "processing" | "storage" | "network" | "balanced"
+  description: string // a quick description 
+  grid_connection: number // how much grid connections it has 
+  water_connection: number  // how much water it has 
+  processing: number | null // processing power of the server 
+  price: number | null // the price of the server, if null we want to minimize 
+  dim: [number, number]
+  data_storage: number | null 
+  focus: "processing" | "storage" | "network" | "server"
   recommended_modules?: string[] // Array of module names
 }
