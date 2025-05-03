@@ -79,7 +79,9 @@ export default function SelectStylePage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-[#011627] text-white">
-      <h1 className="text-3xl font-bold mb-8">Select Datacenter Style</h1>
+      <h1 className="text-3xl font-bold mb-8">
+        {datacenters.length < 1 ? 'Select Datacenter Style' : 'Your Datacenters'}
+      </h1>
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">Error: {error}</p>}
@@ -88,7 +90,6 @@ export default function SelectStylePage() {
         <>
           {/* Horizontal Datacenter Cards */}
           <div className="w-full mb-10">
-            <h2 className="text-2xl font-semibold mb-4">Your Datacenters</h2>
             <div className="relative">
               <div className="overflow-x-auto pb-4 flex space-x-4">
                 {datacenters.length > 0 ? (
