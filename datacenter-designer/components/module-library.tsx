@@ -10,9 +10,10 @@ interface ModuleLibraryProps {
   modules: Module[]
   onSelectModule: (module: Module) => void
   selectedModule: Module | null
+  onResize?: (e: React.MouseEvent) => void
 }
 
-export default function ModuleLibrary({ modules, onSelectModule, selectedModule }: ModuleLibraryProps) {
+export default function ModuleLibrary({ modules, onSelectModule, selectedModule, onResize }: ModuleLibraryProps) {
   const [searchTerm, setSearchTerm] = useState("")
 
   // Group modules by category
@@ -37,7 +38,7 @@ export default function ModuleLibrary({ modules, onSelectModule, selectedModule 
   const categories = Object.keys(groupedModules)
 
   return (
-    <div className="p-4 flex flex-col h-[50vh] border-b border-[#0e3e7b]">
+    <div className="p-4 flex flex-col h-auto border-b border-[#0e3e7b] relative">
       <h2 className="text-xl font-bold mb-4">Module Library</h2>
 
       <div className="relative mb-4">
@@ -74,8 +75,8 @@ export default function ModuleLibrary({ modules, onSelectModule, selectedModule 
                   <div
                     key={module.id}
                     className={`p-3 border rounded cursor-pointer transition-colors ${selectedModule?.id === module.id
-                        ? "bg-[#0e3e7b] border-[#88c0d0]"
-                        : "bg-[#011845] border-[#0e3e7b] hover:bg-[#0a2d5e]"
+                      ? "bg-[#0e3e7b] border-[#88c0d0]"
+                      : "bg-[#011845] border-[#0e3e7b] hover:bg-[#0a2d5e]"
                       }`}
                     onClick={() => onSelectModule(module)}
                   >
