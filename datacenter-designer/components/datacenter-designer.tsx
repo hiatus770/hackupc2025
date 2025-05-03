@@ -23,9 +23,30 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
   const [placedModules, setPlacedModules] = useState<PlacedModule[]>([])
   const [gridSize, setGridSize] = useState({ width: styleData.dim[0] / 10, height: styleData.dim[1] / 10 })
   console.log("Grid Size:", gridSize);
-  const [totalCost, setTotalCost] = useState(0)
-  const [totalPower, setTotalPower] = useState(0)
-  const [totalWater, setTotalWater] = useState(0)
+
+  const [totalCost, setTotalCost] = useState(0); 
+  const [totalPower, setTotalPower] = useState(0); 
+  const [totalWater, setTotalWater] = useState(0); 
+  const [totalArea,  setTotalArea] = useState(0); 
+  
+  let goalArea = 0; // Total area of the datacenter
+  let goalWater = 0; 
+  let goalProcessing = 0; 
+  let goalNetwork = 0; 
+  let goalStorage = 0;  
+
+  // Our goals are dependent on the style 
+  console.log("STYLE ID:", styleId); 
+  if (styleId === "server_square") {
+    goalArea = 1000*500; 
+    
+
+  } else if (styleId === "dense_storage") {
+    
+  } else if (styleId === "supercomputer") {
+
+  }
+  
   const [isPlacingModule, setIsPlacingModule] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(300);
   const sidebarRef = useRef<HTMLDivElement>(null);
