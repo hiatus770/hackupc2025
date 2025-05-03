@@ -1,45 +1,50 @@
 from fastapi import APIRouter, HTTPException, status
-from BD.cliente import cliente_modulos
-
-from DB.modelos.modules import Module
-from DB.esquemas.esquema_modules import module
+from DB.cliente import cliente_modulos
+from DB.modelos import Module
+from DB.esquemas.esquema_modules import module_esquema, modules_esquema
 from bson import ObjectId
-'''
+
 router = APIRouter(tags=["modules"])
-cliente_modulos = cliente_modulos.plantas
+cliente_modulos = cliente_modulos.modules  # Cambiado para usar la colección de módulos
 
-def buscar_entidad(campo: str, clave):
+def buscar_module(campo: str, clave):
     try:
-        modelo = cliente_modelo.find_one({campo: clave})
-        return Module(**module_esquema(module)) #User(**user_schema(user))
+        module = cliente_modulos.find_one({campo: clave})
+        if module:
+            return Module(**module_esquema(module))
+        else:
+            raise ValueError
     except:
-        return {"error": f"No se ha encontrado la entidad con los valores {campo} y {clave}"}
+        return {"error": f"No se ha encontrado el módulo con los valores {campo} y {clave}"}
+
 @router.get("/")
-async def get_entidades():
-    a =entidades_esquema(cliente_pvz.entidades.find()) 
-    print(f"{a}")
+async def get_modules():
+    modules = modules_esquema(cliente_modulos.find())
+    return modules  # Devuelve una lista de módulos en formato JSON
 
-    return entidades_esquema(cliente_pvz.entidades.find()) #devuelve una lista de entidades en formato json borja
+@router.get("/{id}")  # Por path
+async def get_module_by_id(id: str):
+    module = buscar_module("_id", ObjectId(id))
+    if "error" in module:
+        raise HTTPException(status_code=404, detail=module["error"])
+    return module
 
-@router.get("/{id}") #por path
-async def get_entidad_id(id:str):
-    return buscar_entidad("_id", ObjectId(id))
+@router.get("/query")  # Por query
+async def get_module_by_query(id: str):
+    module = buscar_module("_id", ObjectId(id))
+    if "error" in module:
+        raise HTTPException(status_code=404, detail=module["error"])
+    return module
 
-@router.get("/") #por query
-async def get_entidad_id_query(id:str):
-    return buscar_entidad("_id", ObjectId(id))
+@router.post("/", response_model=Module, status_code=201)  # Crear un módulo
+async def post_module(module: Module):
+    if isinstance(buscar_module("_id", ObjectId(module.id)), Module):
+        raise HTTPException(status_code=400, detail=f"El módulo con id {module.id} ya existe")
+    
+    module_dict = module.dict()
+    del module_dict["id"]  # Asegurarse de que no tenga el atributo id
 
-@router.post("/", response_model=Entidad, status_code=201) #por query
-async def post_entidad(entidad: Entidad):
-    if type(buscar_entidad("_id", ObjectId(entidad.id))) == Entidad:
-        raise HTTPException(status_code=404, detail=f"La entidad con id {entidad.id} ya existe")
-    entidad_dict = dict(entidad)
-    del entidad_dict["id"] #Me aseguro que no tenga el atributo id
+    id = cliente_modulos.insert_one(module_dict).inserted_id
 
-    id = cliente_entidad.insert_one(entidad_dict).inserted_id
-
-    new_entidad = entidad_esquema(cliente_entidad.find_one({"_id":id}))
-    return Entidad(**new_entidad)
-
-'''
-#pasando el crud 
+    new_module = module_esquema(cliente_modulos.find_one({"_id": id}))
+    return Module(**new_module)    pip install fastapi bson
