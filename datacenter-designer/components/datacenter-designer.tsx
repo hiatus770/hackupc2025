@@ -180,6 +180,27 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
     console.log(cost, power, water);
   }, [placedModules])
 
+  // Add listener for the custom event
+  useEffect(() => {
+    const handleClearAllModules = () => {
+      // Clear all placed modules
+      setPlacedModules([]);
+      // Optionally, also update the metric calculations
+      setTotalCost(0);
+      setTotalPower(0);
+      setTotalWater(0);
+      setTotalArea(0);
+    };
+
+    // Register the listener
+    window.addEventListener('clearAllModules', handleClearAllModules);
+
+    // Clean up on unmount
+    return () => {
+      window.removeEventListener('clearAllModules', handleClearAllModules);
+    };
+  }, []);
+
   const handleModuleSelect = (module: Module) => {
     setSelectedModule(module)
     setIsPlacingModule(true)

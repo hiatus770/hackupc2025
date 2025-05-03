@@ -93,10 +93,15 @@ export default function DesignerControls({
     alert("Load functionality would be implemented here")
   }
 
+  // Add function to clear the design
   const handleClearDesign = () => {
-    // Implement clear functionality
-    if (confirm("Are you sure you want to clear the current design?")) {
-      // Clear the design
+    // Confirm with the user before deleting everything
+    if (placedModules.length > 0) {
+      if (confirm("Are you sure you want to remove all modules from the grid?")) {
+        // Dispatch event to clear all modules
+        const event = new CustomEvent('clearAllModules');
+        window.dispatchEvent(event);
+      }
     }
   }
 
