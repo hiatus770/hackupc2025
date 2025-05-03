@@ -40,3 +40,8 @@ class ModuleRepository:
     def count(self):
         """Count total modules in collection"""
         return self.collection.count_documents({})
+
+    def validate_object_id(self, id: str):
+        """Validate that a string is a valid MongoDB ObjectId"""
+        if not ObjectId.is_valid(id):
+            raise ValueError("Invalid ID format")  # English error message
