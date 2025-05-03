@@ -10,14 +10,27 @@ class PlacedModuleRepository:
 
     def create(self, placed_module: dict) -> str:
         """Create a new placed module"""
-        # Save module reference instead of embedding if it's a dict
-        if "module" in placed_module and isinstance(placed_module["module"], dict) and "id" in placed_module["module"]:
-            module_id = placed_module["module"]["id"]
-            placed_module["module_id"] = module_id
-            placed_module.pop("module", None)
+        try:
+            # Save module reference instead of embedding if it's a dict
+            if "module" in placed_module and isinstance(placed_module["module"], dict) and "id" in placed_module["module"]:
+                module_id = placed_module["module"]["id"]
+                placed_module["module_id"] = module_id
 
-        result = self.collection.insert_one(placed_module)
-        return str(result.inserted_id)
+            # Ensure we have a module_id
+            if "module_id" not in placed_module:
+                # Try to extract from module if present
+                if "module" in placed_module and isinstance(placed_module["module"], dict):
+                    if "id" in placed_module["module"]:
+                        placed_module["module_id"] = placed_module["module"]["id"]
+                    elif "_id" in placed_module["module"]:
+                        placed_module["module_id"] = str(placed_module["module"]["_id"])
+
+            result = self.collection.insert_one(placed_module)
+            return str(result.inserted_id)
+        except Exception as e:
+            # Log error for debugging
+            print(f"Error creating placed module: {str(e)}")
+            raise
 
     def get_by_id(self, id: str) -> Optional[dict]:
         """Get a placed module by ID"""
