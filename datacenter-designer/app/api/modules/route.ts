@@ -4,194 +4,190 @@ import type { Module } from "@/types/datacenter"
 export async function GET() {
   // This would typically come from a database or external file
   const modules: Module[] = [
-    // Transformers
-    {
-      name: "Transformer_500",
-      type: "transformer",
-      dim: [3, 3],
-      cost: 50000,
-      supplied_power: 500,
-      description: "500kW transformer for medium-sized datacenter power needs.",
-    },
-    {
-      name: "Transformer_1000",
-      type: "transformer",
-      dim: [4, 4],
-      cost: 100000,
-      supplied_power: 1000,
-      description: "1MW transformer for large datacenter power requirements.",
-    },
-    {
-      name: "Transformer_2000",
-      type: "transformer",
-      dim: [5, 5],
-      cost: 180000,
-      supplied_power: 2000,
-      description: "2MW high-capacity transformer for enterprise datacenters.",
-    },
-
-    // Water Supply
-    {
-      name: "Water_Supply_Basic",
-      type: "water_supply",
-      dim: [2, 2],
-      cost: 25000,
-      supplied_water: 200,
-      description: "Basic water supply system for small datacenters.",
-    },
-    {
-      name: "Water_Supply_Advanced",
-      type: "water_supply",
-      dim: [3, 3],
-      cost: 45000,
-      supplied_water: 500,
-      description: "Advanced water supply system with redundancy features.",
-    },
-
-    // Water Treatment
-    {
-      name: "Water_Treatment_Standard",
-      type: "water_treatment",
-      dim: [2, 3],
-      cost: 35000,
-      water_usage: 50,
-      supplied_water: 150,
-      description: "Standard water treatment plant for datacenter cooling systems.",
-    },
-    {
-      name: "Water_Treatment_Recycling",
-      type: "water_treatment",
-      dim: [3, 4],
-      cost: 65000,
-      water_usage: 80,
-      supplied_water: 300,
-      description: "Advanced water recycling system with 90% efficiency.",
-    },
-
-    // Water Chiller
-    {
-      name: "Water_Chiller_Small",
-      type: "water_chiller",
-      dim: [2, 2],
-      cost: 30000,
-      water_usage: 100,
-      power_usage: 50,
-      description: "Small water chiller for cooling up to 500kW of IT load.",
-    },
-    {
-      name: "Water_Chiller_Medium",
-      type: "water_chiller",
-      dim: [3, 3],
-      cost: 60000,
-      water_usage: 200,
-      power_usage: 100,
-      description: "Medium water chiller for cooling up to 1MW of IT load.",
-    },
-    {
-      name: "Water_Chiller_Large",
-      type: "water_chiller",
-      dim: [4, 4],
-      cost: 120000,
-      water_usage: 400,
-      power_usage: 200,
-      description: "Large water chiller for cooling up to 2MW of IT load.",
-    },
-
-    // Network Racks
-    {
-      name: "Network_Rack_Basic",
-      type: "network_rack",
-      dim: [1, 1],
-      cost: 15000,
-      power_usage: 5,
-      water_usage: 2,
-      network_capacity: 100,
-      description: "Basic network rack with 100Gbps capacity.",
-    },
-    {
-      name: "Network_Rack_Advanced",
-      type: "network_rack",
-      dim: [1, 2],
-      cost: 35000,
-      power_usage: 10,
-      water_usage: 5,
-      network_capacity: 400,
-      description: "Advanced network rack with 400Gbps capacity and redundancy.",
-    },
-    {
-      name: "Network_Rack_Enterprise",
-      type: "network_rack",
-      dim: [2, 2],
-      cost: 75000,
-      power_usage: 20,
-      water_usage: 10,
-      network_capacity: 1000,
-      description: "Enterprise-grade network rack with 1Tbps capacity and full redundancy.",
-    },
-
-    // Storage Racks
-    {
-      name: "Storage_Rack_HDD",
-      type: "storage_rack",
-      dim: [1, 1],
-      cost: 20000,
-      power_usage: 8,
-      water_usage: 4,
-      storage_capacity: 500,
-      description: "HDD storage rack with 500TB capacity.",
-    },
-    {
-      name: "Storage_Rack_SSD",
-      type: "storage_rack",
-      dim: [1, 1],
-      cost: 40000,
-      power_usage: 12,
-      water_usage: 6,
-      storage_capacity: 200,
-      description: "SSD storage rack with 200TB capacity and high IOPS.",
-    },
-    {
-      name: "Storage_Rack_NVMe",
-      type: "storage_rack",
-      dim: [1, 2],
-      cost: 80000,
-      power_usage: 20,
-      water_usage: 10,
-      storage_capacity: 300,
-      description: "NVMe storage rack with 300TB capacity and ultra-low latency.",
-    },
-
-    // Server Racks
-    {
-      name: "Server_Rack_Standard",
-      type: "server_rack",
-      dim: [1, 1],
-      cost: 25000,
-      power_usage: 15,
-      water_usage: 8,
-      processing_power: 100,
-      description: "Standard server rack with 100 TFLOPS of processing power.",
-    },
-    {
-      name: "Server_Rack_HighDensity",
-      type: "server_rack",
-      dim: [1, 1],
-      cost: 50000,
-      power_usage: 30,
-      water_usage: 15,
-      processing_power: 250,
-      description: "High-density server rack with 250 TFLOPS of processing power.",
-    },
-    {
-      name: "Server_Rack_GPU",
-      type: "server_rack",
-      dim: [1, 2],
-      cost: 120000,
-      power_usage: 60,
-      water_usage: 30,
-      processing_power: 1000,
-      description: "GPU-accelerated server rack with 1 PFLOPS of processing power.",
-    },
+      {
+        "id": "transformer_100",
+        "type": "transformer",
+        "grid_connection": 1,
+        "dim": [40, 45],
+        "price": 1000,
+        "usable_power": 100
+      },
+      {
+        "id": "transformer_1000",
+        "type": "transformer",
+        "grid_connection": 1,
+        "dim": [100, 100],
+        "price": 50000,
+        "usable_power": 1000
+      },
+      {
+        "id": "transformer_5000",
+        "type": "transformer",
+        "grid_connection": 1,
+        "dim": [200, 200],
+        "price": 250000,
+        "usable_power": 5000
+      },
+      {
+        "id": "water_supply_100",
+        "type": "water supply",
+        "water_connection": 1,
+        "dim": [50, 50],
+        "price": 200,
+        "fresh_water": 100
+      },
+      {
+        "id": "water_supply_500",
+        "type": "water supply",
+        "water_connection": 1,
+        "dim": [150, 100],
+        "price": 400,
+        "fresh_water": 500
+      },
+      {
+        "id": "water_treatment_50",
+        "type": "water treatment",
+        "fresh_water": 50,
+        "usable_power": 50,
+        "dim": [50, 50],
+        "price": 10000,
+        "distilled_water": 50
+      },
+      {
+        "id": "water_treatment_250",
+        "type": "water treatment",
+        "fresh_water": 250,
+        "usable_power": 90,
+        "dim": [200, 200],
+        "price": 40000,
+        "distilled_water": 250
+      },
+      {
+        "id": "water_treatment_500",
+        "type": "water treatment",
+        "fresh_water": 500,
+        "usable_power": 150,
+        "dim": [400, 400],
+        "price": 70000,
+        "distilled_water": 500
+      },
+      {
+        "id": "water_chiller_100",
+        "type": "water chiller",
+        "distilled_water": 100,
+        "usable_power": 500,
+        "dim": [100, 100],
+        "price": 40000,
+        "chilled_water": 95
+      },
+      {
+        "id": "water_chiller_400",
+        "type": "water chiller",
+        "distilled_water": 400,
+        "usable_power": 1500,
+        "dim": [300, 100],
+        "price": 150000,
+        "chilled_water": 390
+      },
+      {
+        "id": "network_rack_50",
+        "type": "network rack",
+        "usable_power": 50,
+        "chilled_water": 5,
+        "internal_network": 50,
+        "fresh_water": 5,
+        "dim": [40, 40],
+        "price": 2000
+      },
+      {
+        "id": "network_rack_100",
+        "type": "network rack",
+        "usable_power": 75,
+        "chilled_water": 7,
+        "internal_network": 100,
+        "fresh_water": 7,
+        "dim": [40, 40],
+        "price": 8000
+      },
+      {
+        "id": "network_rack_200",
+        "type": "network rack",
+        "usable_power": 95,
+        "chilled_water": 10,
+        "internal_network": 200,
+        "fresh_water": 40,
+        "dim": [40, 40],
+        "price": 20000
+      },
+      {
+        "id": "server_rack_100",
+        "type": "server rack",
+        "usable_power": 75,
+        "chilled_water": 15,
+        "internal_network": 10,
+        "distilled_water": 15,
+        "processing": 100,
+        "external_network": 100,
+        "dim": [40, 40],
+        "price": 8000
+      },
+      {
+        "id": "server_rack_200",
+        "type": "server rack",
+        "usable_power": 125,
+        "chilled_water": 25,
+        "internal_network": 18,
+        "distilled_water": 25,
+        "processing": 150,
+        "external_network": 200,
+        "dim": [40, 40],
+        "price": 12000
+      },
+      {
+        "id": "server_rack_500",
+        "type": "server rack",
+        "usable_power": 240,
+        "chilled_water": 50,
+        "internal_network": 32,
+        "distilled_water": 50,
+        "processing": 1000,
+        "external_network": 400,
+        "dim": [40, 40],
+        "price": 50000
+      },
+      {
+        "id": "data_rack_100",
+        "type": "data rack",
+        "usable_power": 15,
+        "chilled_water": 3,
+        "internal_network": 5,
+        "distilled_water": 3,
+        "data_storage": 100,
+        "dim": [40, 40],
+        "price": 2000
+      },
+      {
+        "id": "data_rack_250",
+        "type": "data rack",
+        "usable_power": 25,
+        "chilled_water": 3,
+        "internal_network": 10,
+        "distilled_water": 3,
+        "data_storage": 250,
+        "dim": [40, 40],
+        "price": 7500
+      },
+      {
+        "id": "data_rack_500",
+        "type": "data rack",
+        "usable_power": 40,
+        "chilled_water": 6,
+        "internal_network": 20,
+        "distilled_water": 6,
+        "data_storage": 500,
+        "dim": [40, 40],
+        "price": 20500
+      }    
   ]
 
   return NextResponse.json(modules)
