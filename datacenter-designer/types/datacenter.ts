@@ -31,13 +31,13 @@ export interface Module {
 
 export interface PlacedModule {
   id: string
-  module: Module
+ module: Module
   position: {
     x: number
     y: number
   }
   rotation: number // 0, 90, 180, 270 degrees
-}
+} 
 
 
 export interface DatacenterStyle {
