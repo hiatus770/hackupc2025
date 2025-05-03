@@ -167,6 +167,27 @@ async def get_component_specs(component_id: str):
 
     return datacenter_specs_esquema(specs)
 
+@router.delete("/all", response_description="Delete all datacenter specifications")
+async def delete_all_specs():
+    """
+    Delete all datacenter specifications from the database.
+    WARNING: This will remove ALL specifications and cannot be undone.
+    """
+    try:
+        count = datacenter_spec_repo.collection.count_documents({})
+
+        result = datacenter_spec_repo.collection.delete_many({})
+
+        if result.deleted_count == 0:
+            return {"message": "No datacenter specifications found to delete"}
+
+        return {
+            "message": f"Successfully deleted {result.deleted_count} datacenter specifications",
+            "deleted_count": result.deleted_count
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting datacenter specifications: {str(e)}")
+
 @router.get("/test", response_description="Test endpoint")
 async def test_endpoint():
     return {"message": "The datacenter_spec router is working"}
