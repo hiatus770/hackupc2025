@@ -1,19 +1,48 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import type { Module } from "@/types/datacenter"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search } from "lucide-react"
+import styles from "./module-library.module.css"
 
 interface ModuleLibraryProps {
   modules: Module[]
   onSelectModule: (module: Module) => void
   selectedModule: Module | null
+  onResize?: (e: React.MouseEvent) => void
 }
 
-export default function ModuleLibrary({ modules, onSelectModule, selectedModule }: ModuleLibraryProps) {
+export default function ModuleLibrary({ modules, onSelectModule, selectedModule, onResize }: ModuleLibraryProps) {
   const [searchTerm, setSearchTerm] = useState("")
+  const tabsListRef = useRef<HTMLDivElement>(null)
+
+  // Mejora en el manejo del evento wheel para scroll horizontal
+  useEffect(() => {
+    const tabsList = tabsListRef.current;
+
+    if (!tabsList) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Prevenimos el comportamiento por defecto
+      e.preventDefault();
+
+      // Aplicamos el scroll horizontal con una velocidad razonable
+      tabsList.scrollBy({
+        left: e.deltaY * 0.5,
+        behavior: 'smooth'
+      });
+    };
+
+    // Añadimos el event listener
+    tabsList.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      // Limpiamos el event listener
+      tabsList.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
 
   // Group modules by category
   const groupedModules = modules.reduce(
@@ -37,7 +66,7 @@ export default function ModuleLibrary({ modules, onSelectModule, selectedModule 
   const categories = Object.keys(groupedModules)
 
   return (
-    <div className="p-4 flex flex-col h-[50vh] border-b border-[#0e3e7b]">
+    <div className="p-4 flex flex-col h-auto border-b border-[#0e3e7b] relative">
       <h2 className="text-xl font-bold mb-4">Module Library</h2>
 
       <div className="relative mb-4">
@@ -52,7 +81,14 @@ export default function ModuleLibrary({ modules, onSelectModule, selectedModule 
       </div>
 
       <Tabs defaultValue={categories[0] || "all"}>
-        <ScrollArea className="w-full pb-2" orientation="horizontal" scrollHideDelay={0} type="scroll">
+        <div
+          className="w-full overflow-x-auto pb-2 custom-scrollbar"
+          ref={tabsListRef}
+          style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#0e3e7b #01193d',
+          }}
+        >
           <TabsList className="w-max bg-[#011845] border border-[#0e3e7b] flex-nowrap inline-flex">
             {categories.map((category) => (
               <TabsTrigger
@@ -64,7 +100,7 @@ export default function ModuleLibrary({ modules, onSelectModule, selectedModule 
               </TabsTrigger>
             ))}
           </TabsList>
-        </ScrollArea>
+        </div>
 
         {categories.map((category) => (
           <TabsContent key={category} value={category} className="mt-2 flex-1 overflow-hidden">
@@ -74,8 +110,8 @@ export default function ModuleLibrary({ modules, onSelectModule, selectedModule 
                   <div
                     key={module.id}
                     className={`p-3 border rounded cursor-pointer transition-colors ${selectedModule?.id === module.id
-                        ? "bg-[#0e3e7b] border-[#88c0d0]"
-                        : "bg-[#011845] border-[#0e3e7b] hover:bg-[#0a2d5e]"
+                      ? "bg-[#0e3e7b] border-[#88c0d0]"
+                      : "bg-[#011845] border-[#0e3e7b] hover:bg-[#0a2d5e]"
                       }`}
                     onClick={() => onSelectModule(module)}
                   >

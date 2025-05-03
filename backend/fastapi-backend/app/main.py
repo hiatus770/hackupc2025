@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from bson.errors import InvalidId
-from app.routers import modules, datacenter_spec, datacenter_styles
+from app.routers import modules, datacenter_spec, datacenter_styles, datacenters, placed_modules, positions
 
 app = FastAPI()
 
@@ -21,3 +21,6 @@ async def invalid_id_exception_handler(request: Request, exc: InvalidId):
 app.include_router(modules.router)
 app.include_router(datacenter_spec.router)
 app.include_router(datacenter_styles.router)
+app.include_router(datacenters.router)
+app.include_router(placed_modules.router)
+app.include_router(positions.router)

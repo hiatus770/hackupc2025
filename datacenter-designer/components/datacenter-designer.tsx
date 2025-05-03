@@ -12,7 +12,7 @@ import styles from "./datacenter-designer.module.css"
 import { set } from "date-fns"
 
 interface DatacenterDesignerProps {
-  styleId: string 
+  styleId: string
   // Now allow the passing of the entire json style object
   styleData: DatacenterStyle
 }
@@ -22,7 +22,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
   const [selectedStyle, setSelectedStyle] = useState<DatacenterStyle | null>(null)
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
   const [placedModules, setPlacedModules] = useState<PlacedModule[]>([])
-  const [gridSize, setGridSize] = useState({ width: styleData.dim[0]/10 , height: styleData.dim[1]/10 })
+  const [gridSize, setGridSize] = useState({ width: styleData.dim[0] / 10, height: styleData.dim[1] / 10 })
   console.log("Grid Size:", gridSize);
 
   const [totalCost, setTotalCost] = useState(0); 
@@ -80,7 +80,9 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
   const handleMouseMove = (e: MouseEvent) => {
     if (!resizingRef.current) return;
     const newWidth = e.clientX;
-    if (newWidth >= 300) {
+    // Respetar el max-width establecido (30vw)
+    const maxAllowedWidth = window.innerWidth * 0.3;
+    if (newWidth >= 300 && newWidth <= maxAllowedWidth) {
       setSidebarWidth(newWidth);
     }
   };
@@ -150,7 +152,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
     setTotalInternalNetwork(internalNetwork)
     setTotalInternalWater(internalWater)
     setTotalWater(water)
-    console.log(cost, power, water, network, processing, storage, area); 
+    console.log(cost, power, water);
   }, [placedModules])
 
   const handleModuleSelect = (module: Module) => {
@@ -163,9 +165,9 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
 
     // Check if placement is valid (not overlapping other modules)
     const isValid = checkPlacementValidity(x, y, selectedModule, rotation)
-    console.log("Placing!"); 
+    console.log("Placing!");
     if (isValid) {
-      console.log("Placing"); 
+      console.log("Placing");
       const newPlacedModule: PlacedModule = {
         id: `${Date.now()}`,
         module: selectedModule,
@@ -223,8 +225,8 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
     setGridSize({ width, height })
     // Validate existing placements with new grid size
     const validPlacements = placedModules.filter((placed) => {
-      const placedWidth = placed.rotation % 180 === 0 ? placed.module.dim[0]/10 : placed.module.dim[1]/10
-      const placedHeight = placed.rotation % 180 === 0 ? placed.module.dim[1]/10 : placed.module.dim[0]/10
+      const placedWidth = placed.rotation % 180 === 0 ? placed.module.dim[0] / 10 : placed.module.dim[1] / 10
+      const placedHeight = placed.rotation % 180 === 0 ? placed.module.dim[1] / 10 : placed.module.dim[0] / 10
 
       return placed.position.x + placedWidth <= width && placed.position.y + placedHeight <= height
     })
@@ -307,10 +309,23 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
       <div className={styles.mainContent} style={{ display: 'flex', width: '100%', position: 'relative' }}>
         <div
           ref={sidebarRef}
-          style={{ width: `${sidebarWidth}px`, minWidth: '300px', maxWidth: '30vw', flexShrink: 0 }}
-          className="bg-[#01193d] border-r border-[#0e3e7b] flex flex-col h-[calc(100vh-60px)] overflow-auto relative"
+          style={{ width: `${sidebarWidth}px`, minWidth: '300px', maxWidth: '30vw', flexShrink: 0, position: 'relative' }}
+          className={`bg-[#01193d] border-r border-[#0e3e7b] flex flex-col h-[calc(100vh-60px)] overflow-auto ${styles.hideScrollbar}`}
         >
-          <ModuleLibrary modules={modules} onSelectModule={handleModuleSelect} selectedModule={selectedModule} />
+          {/* Divisor para redimensionar que ocupa toda la altura */}
+          <div
+            className="fixed right-auto top-[60px] w-2 bg-[#0e3e7b] cursor-ew-resize hover:bg-blue-500 z-50 h-[calc(100vh-60px)] pointer-events-auto"
+            style={{
+              left: `${Math.min(sidebarWidth, window.innerWidth * 0.3)}px`
+            }}
+            onMouseDown={startResizing}
+          />
+
+          <ModuleLibrary
+            modules={modules}
+            onSelectModule={handleModuleSelect}
+            selectedModule={selectedModule}
+          />
 
           {selectedModule && (
             <ModuleDetails
@@ -329,11 +344,6 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
             gridSize={gridSize}
             onGridSizeChange={handleGridSizeChange}
           />
-
-          <div
-            className="absolute right-0 top-0 bottom-0 w-2 bg-[#0e3e7b] cursor-ew-resize hover:bg-blue-500 z-10"
-            onMouseDown={startResizing}
-          />
         </div>
 
         <div className={styles.canvasContainer} style={{ flex: '1', overflow: 'hidden' }}>
@@ -349,12 +359,12 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
               isPlacingModule={isPlacingModule}
               selectedModule={selectedModule}
             />
-            <OrbitControls 
+            <OrbitControls
               ref={orbitControlsRef}
-              minPolarAngle={0} 
-              maxPolarAngle={Math.PI / 2.1} 
-              enableZoom={true} 
-              enablePan={true} 
+              minPolarAngle={0}
+              maxPolarAngle={Math.PI / 2.1}
+              enableZoom={true}
+              enablePan={true}
               minDistance={10}
               maxDistance={1000}
               panSpeed={2}
