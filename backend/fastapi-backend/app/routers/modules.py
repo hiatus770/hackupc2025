@@ -7,7 +7,10 @@ from pydantic import BaseModel
 from typing import List
 from app.repositories.module_repository import ModuleRepository
 
-router = APIRouter(tags=["modules"])
+router = APIRouter(
+    prefix="/modules",
+    tags=["modules"]
+)
 modules_collection = cliente_modulos["modules"]
 module_repo = ModuleRepository()  # Initialize repository
 
@@ -23,11 +26,11 @@ def buscar_module(campo: str, clave):
     try:
         module = modules_collection.find_one({campo: clave})
         if module:
-            return Module(**module_esquema(module))
+            return module_esquema(module)
         else:
-            raise ValueError
+            raise ValueError(f"No module found with {campo}={clave}")
     except Exception as e:
-        return {"error": f"No se ha encontrado el módulo con los valores {campo} y {clave}: {str(e)}"}
+        return {"error": f"Module not found with field {campo} and value {clave}: {str(e)}"}
 
 @router.get("/")
 async def get_modules():
@@ -158,16 +161,33 @@ async def import_modules_json(import_request: JSONModuleImportRequest):
 @router.get("/{id}")
 async def get_module_by_id(id: str):
     try:
-        if ObjectId.is_valid(id):
-            module = buscar_module("_id", ObjectId(id))
-            if isinstance(module, dict) and "error" in module:
-                raise HTTPException(status_code=404, detail=module["error"])
-            return module
-        else:
-            module = buscar_module("ID", id)
-            if isinstance(module, dict) and "error" in module:
-                raise HTTPException(status_code=404, detail=f"No module found with ID: {id}")
-            return module
+        # First check if ID is valid before attempting conversion
+        is_valid_object_id = False
+        try:
+            if id and ObjectId.is_valid(id):
+                is_valid_object_id = True
+        except:
+            # If any error occurs during validation, just treat it as invalid
+            is_valid_object_id = False
+
+        # First try to find by string ID directly
+        module = modules_collection.find_one({"id": id})
+        if module:
+            return module_esquema(module)
+
+        # Try by legacy ID field
+        module = modules_collection.find_one({"ID": id})
+        if module:
+            return module_esquema(module)
+
+        # Only try ObjectId if it's valid
+        if is_valid_object_id:
+            module = modules_collection.find_one({"_id": ObjectId(id)})
+            if module:
+                return module_esquema(module)
+
+        # If we get here, no module was found
+        raise HTTPException(status_code=404, detail=f"Module not found with ID: {id}")
     except HTTPException:
         raise
     except Exception as e:
@@ -193,16 +213,23 @@ async def get_module_by_query(id: str):
 async def post_module(module: Module):
     try:
         if hasattr(module, "id") and module.id:
-            if isinstance(buscar_module("_id", ObjectId(module.id)), Module):
-                raise HTTPException(status_code=400, detail=f"El módulo con id {module.id} ya existe")
+            if ObjectId.is_valid(module.id):
+                existing = modules_collection.find_one({"_id": ObjectId(module.id)})
+                if existing:
+                    raise HTTPException(status_code=400, detail=f"Module with id {module.id} already exists")
+            else:
+                existing = modules_collection.find_one({"id": module.id})
+                if existing:
+                    raise HTTPException(status_code=400, detail=f"Module with id {module.id} already exists")
 
         module_dict = module.dict(exclude={"id"} if hasattr(module, "id") else None)
         id = modules_collection.insert_one(module_dict).inserted_id
         new_module = module_esquema(modules_collection.find_one({"_id": id}))
         return Module(**new_module)
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al crear el módulo: {str(e)}")
-
+        raise HTTPException(status_code=500, detail=f"Error creating module: {str(e)}")
 
 @router.delete("/all", response_description="Delete all modules")
 async def delete_all_modules():

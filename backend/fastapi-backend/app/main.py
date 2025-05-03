@@ -1,5 +1,7 @@
-from fastapi import FastAPI
-from app.routers import modules  # Make sure this import is correct
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from bson.errors import InvalidId
+from app.routers import modules, datacenter_spec, datacenter_styles
 
 app = FastAPI()
 
@@ -7,5 +9,15 @@ app = FastAPI()
 def read_root():
     return {"message": "Welcome to the FastAPI application!"}
 
-app.include_router(modules.router, prefix="/datacenter-specs")
-app.include_router(modules.router, prefix="/modules")
+# Add this to handle InvalidId exceptions with English error messages
+@app.exception_handler(InvalidId)
+async def invalid_id_exception_handler(request: Request, exc: InvalidId):
+    return JSONResponse(
+        status_code=400,
+        content={"detail": "Invalid ID format"},
+    )
+
+# Include all routers
+app.include_router(modules.router)
+app.include_router(datacenter_spec.router)
+app.include_router(datacenter_styles.router)
