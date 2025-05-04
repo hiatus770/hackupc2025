@@ -480,11 +480,11 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
           <div className={styles.metric}>
             <span>Storage:</span>
             {goalStorage > 0 ? ( // Only show if a target storage is set
-              <span style={{ color: totalStorage >= goalStorage ? 'lightgreen' : 'orange' }}>
-                {totalStorage.toLocaleString()} {totalStorage >= goalStorage ? 'Above or at Goal' : 'Below Goal'}
+              <span style={{ color: totalStorage >= goalStorage  ? 'lightgreen' : 'orange' }}>
+                {totalStorage.toLocaleString()} {totalStorage >= goalStorage ? 'Storage Balance' : 'Storage Deficit'}
               </span>
             ) : (
-              <span>{totalStorage.toLocaleString()} GB</span> // Fallback if no target
+              <span>{(totalStorage - goalStorage).toLocaleString()} GB</span> // Fallback if no target
             )}
           </div> 
         </div>
