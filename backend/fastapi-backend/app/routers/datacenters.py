@@ -106,7 +106,27 @@ async def get_datacenter(id: str, include_modules: bool = True):
         if not datacenter:
             raise HTTPException(status_code=404, detail=f"Datacenter with ID {id} not found")
 
-        return datacenter_esquema(datacenter)
+        # Extract modules if they exist
+        modules_list = []
+        if include_modules and "modules" in datacenter:
+            for module in datacenter.get("modules", []):
+                module_id = module.get("module_id") or (module.get("module", {}) or {}).get("id")
+                if not module_id:
+                    continue
+
+                modules_list.append({
+                    "id": module_id,
+                    "position": module.get("position", {}),
+                    "rotation": module.get("rotation", 0)
+                })
+
+        # Create response in requested format
+        response = {
+            "styleId": datacenter.get("style_id", ""),
+            "modules": modules_list
+        }
+
+        return response
     except HTTPException:
         raise
     except Exception as e:
@@ -192,15 +212,15 @@ async def create_datacenter(datacenter_request: DatacenterCreateSimple):
 
         # Now process all modules
         for module_pos in datacenter_request.modules:
-            # Fetch the module details by ID
+            # Verify the module exists
             module_info = module_repo.get_by_id(module_pos.id)
             if not module_info:
                 missing_modules.append(module_pos.id)
                 continue  # Skip if module not found
 
-            # Create a placed module
+            # Create a placed module - only store the module_id, not the full module object
             placed_module = {
-                "module_id": module_pos.id,  # Store the ID separately
+                "module_id": module_pos.id,
                 "position": module_pos.position.dict(),
                 "rotation": module_pos.rotation,
                 "datacenter_id": datacenter_id
@@ -302,12 +322,12 @@ async def update_datacenter_layout(id: str, layout_request: DatacenterCreateSimp
 
         # Process all new modules
         for module_pos in layout_request.modules:
-            # Fetch the module details by ID
+            # Verify the module exists
             module_info = module_repo.get_by_id(module_pos.id)
             if not module_info:
                 continue  # Skip if module not found
 
-            # Create a placed module
+            # Create a placed module - only store the module_id, not the full module
             placed_module = {
                 "module": module_info,  # Full module info
                 "module_id": module_pos.id,  # Also store the ID separately
