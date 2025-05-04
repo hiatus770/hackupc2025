@@ -47,6 +47,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
   if (styleId === "server_square") {
     goalArea = 1000 * 500;
     goalStorage = styleData.data_storage ?? 0
+    console.log("STORAGE:", goalStorage);
     goalProcessing = styleData.processing ?? 0
 
 
@@ -59,6 +60,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
     goalArea = 2000 * 1000;
   } else {
     // Custom 
+    
   }
 
   const [isPlacingModule, setIsPlacingModule] = useState(false)
@@ -180,7 +182,10 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
     })
 
     setTotalCost(cost)
-    console.log("TOTALS: ", cost, power, water);
+
+    // Print all possible values
+    console.log("POWER: ", power, " WATER: ", water, " INTERNAL WATER: ", internalWater, " NETWORK: ", network, " INTERNAL NETWORK: ", internalNetwork, " PROCESSING: ", processing, " STORAGE: ", storage, " AREA: ", area);
+
     setTotalPower(power)
     setTotalProcessing(processing)
     setTotalStorage(storage)
@@ -188,7 +193,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
     setTotalInternalNetwork(internalNetwork)
     setTotalInternalWater(internalWater)
     setTotalWater(water)
-    console.log(cost, power, water);
+    
   }, [placedModules])
 
   // Add listener for the custom event

@@ -20,6 +20,7 @@ async function generate_custom(prompt: string) {
     });
     if (!res.ok) throw new Error('Failed to generate style');
     const style = await res.json();
+    console.log("Generated style:", style);
     return style;
 }
 
@@ -30,6 +31,8 @@ export default function DesignerPage({ params }: { params: { styleId: string } }
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedStyle, setSelectedStyle] = useState<DatacenterStyle | null>(null);
+
+    console.log("STYLE JSON:", selectedStyle);  
 
     // Handle custom prompt submission
     const handleCustomSubmit = async (e: React.FormEvent) => {
