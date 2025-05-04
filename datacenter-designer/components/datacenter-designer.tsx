@@ -44,6 +44,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
   // Our goals are dependent on the style 
   targetPrice = styleData.price ?? 0
   console.log("STYLE ID:", styleId);
+
   if (styleId === "server_square") {
     goalArea = 1000 * 500;
     goalStorage = styleData.data_storage ?? 0
@@ -59,9 +60,29 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
     // Maximize processing 
     goalArea = 2000 * 1000;
   } else {
+    console.log("CUSTOM!"); 
+    console.log("storage: ", styleData.data_storage);
     // Custom 
+    if (styleData.data_storage || 0 > 0) {
+      goalStorage = styleData.data_storage ?? 0
+    }
+    if (styleData.processing || 0 > 0) {
+      goalProcessing = styleData.processing ?? 0
+    }
+    if (styleData.water_connection || 0 > 0) {
+      goalWater = styleData.water_connection ?? 0
+    }
+    if (styleData.grid_connection || 0 > 0) {
+      goalNetwork = styleData.grid_connection ?? 0
+    }
+    if (styleData.water_connection || 0 > 0) {
+      goalWater = styleData.water_connection ?? 0
+    }
     
   }
+
+  // Print all goals 
+  console.log("GOALS: ", goalArea, goalWater, goalProcessing, goalNetwork, goalStorage);
 
   const [isPlacingModule, setIsPlacingModule] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(300);
@@ -460,7 +481,7 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
             <span>Storage:</span>
             {goalStorage > 0 ? ( // Only show if a target storage is set
               <span style={{ color: totalStorage >= goalStorage ? 'lightgreen' : 'orange' }}>
-                {totalStorage.toLocaleString()} {totalStorage >= goalStorage ? 'Above Goal' : 'Below Goal'}
+                {totalStorage.toLocaleString()} {totalStorage >= goalStorage ? 'Above or at Goal' : 'Below Goal'}
               </span>
             ) : (
               <span>{totalStorage.toLocaleString()} GB</span> // Fallback if no target

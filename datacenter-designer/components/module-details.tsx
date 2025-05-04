@@ -9,6 +9,10 @@ interface ModuleDetailsProps {
 }
 
 export default function ModuleDetails({ module, onClose }: ModuleDetailsProps) {
+
+  console.log("ModuleDetails", module)
+  // Check if module is valid
+
   return (
     <div className="p-4 border-t border-[#0e3e7b] flex-shrink-0">
       <div className="flex justify-between items-center mb-3">
@@ -78,17 +82,10 @@ export default function ModuleDetails({ module, onClose }: ModuleDetailsProps) {
           </div>
         )}
 
-        {module.storage_capacity !== undefined && module.storage_capacity > 0 && (
+        {module.data_storage !== undefined && module.data_storage > 0 && (
           <div className="flex justify-between">
             <span className="text-[#88c0d0]">Storage Capacity:</span>
-            <span className="text-green-400">+{module.storage_capacity} TB</span>
-          </div>
-        )}
-
-        {module.storage_capacity !== undefined && module.storage_capacity < 0 && (
-          <div className="flex justify-between">
-            <span className="text-[#88c0d0]">Storage Usage:</span>
-            <span className="text-red-400">{module.storage_capacity} TB</span>
+            <span className="text-green-400">+{module.data_storage} TB</span>
           </div>
         )}
 
@@ -117,6 +114,20 @@ export default function ModuleDetails({ module, onClose }: ModuleDetailsProps) {
           <div className="flex justify-between">
             <span className="text-[#88c0d0]">External Network Usage:</span>
             <span className="text-red-400">{module.external_network} Gbps</span>
+          </div>
+        )}
+
+        {module.chilled_water !== undefined && module.chilled_water > 0 && (
+          <div className="flex justify-between">
+            <span className="text-[#88c0d0]">Chilled Water Supply:</span>
+            <span className="text-green-400">+{module.chilled_water} kL</span>
+          </div>
+        )}
+
+        {module.chilled_water !== undefined && module.chilled_water < 0 && (
+          <div className="flex justify-between">
+            <span className="text-[#88c0d0]">Chilled Water Usage:</span>
+            <span className="text-red-400">{module.chilled_water} kL</span>
           </div>
         )}
       </div>
