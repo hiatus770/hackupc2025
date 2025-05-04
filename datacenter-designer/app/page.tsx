@@ -78,7 +78,7 @@ export default function SelectStylePage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-[#011627] text-white">
       <div className="mb-8 text-center">
-        <p className="text-4xl font-bold text-[#a3be8c]">✨ Rack Atack ✨</p>
+        <p className="text-4xl font-bold text-[#a3be8c]">✨ Rack Attack ✨</p>
       </div>
       <h1 className="text-3xl font-bold mb-8">
         {datacenters.length < 1 ? 'Select Datacenter Style' : 'Your Datacenters'}
