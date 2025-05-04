@@ -43,7 +43,8 @@ export default function SelectStylePage() {
 
         // Fetch datacenters
         try {
-          const datacentersResponse = await fetch('http://localhost:3000/api/datacenters-styles');
+          //const datacentersResponse = await fetch('http://localhost:3000/api/datacenters-styles');
+          const datacentersResponse = await fetch('http://localhost:8000/datacenters');
           if (!datacentersResponse.ok) {
             const errorText = await datacentersResponse.text();
             console.error('Error response:', errorText);
