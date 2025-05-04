@@ -44,12 +44,14 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
   // Our goals are dependent on the style 
   targetPrice = styleData.price ?? 0
   console.log("STYLE ID:", styleId);
+  console.log("STYLE DATA:", styleData); 
 
   if (styleId === "server_square") {
     goalArea = 1000 * 500;
     goalStorage = styleData.data_storage ?? 0
     console.log("STORAGE:", goalStorage);
-    goalProcessing = styleData.processing ?? 0
+    goalProcessing = styleData.processing ?? 0 
+    
 
 
   } else if (styleId === "dense_storage") {
@@ -477,6 +479,8 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
             ) : (
               <span>{totalProcessing.toLocaleString()} kW</span> // Fallback if no target
             )}
+
+
           </div>
           {/* Storage Goal Comparison */}
           <div className={styles.metric}>
