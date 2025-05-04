@@ -106,7 +106,19 @@ async def get_datacenter(id: str, include_modules: bool = True):
         if not datacenter:
             raise HTTPException(status_code=404, detail=f"Datacenter with ID {id} not found")
 
-        # Extract modules if they exist
+        return datacenter_esquema(datacenter)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving datacenter: {str(e)}")
+
+@router.get("/minimal/{id}", response_description="Get a datacenter by ID")
+async def get_datacenter(id: str, include_modules: bool = True):
+    try:
+        datacenter = datacenter_repo.get_by_id(id, include_modules)
+        if not datacenter:
+            raise HTTPException(status_code=404, detail=f"Datacenter with ID {id} not found")
+
         modules_list = []
         if include_modules and "modules" in datacenter:
             for module in datacenter.get("modules", []):

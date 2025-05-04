@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
 
 // Define the datacenter details interface
 interface DatacenterDetails {
@@ -23,6 +25,39 @@ export default function DatacenterDetailsPage() {
   const [datacenter, setDatacenter] = useState<DatacenterDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleSaveDesign = async () => {
+    if (!datacenter) return;
+    try {
+      const response = await fetch(`http://localhost:8000/datacenters/minimal/${datacenter.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+
+      if (!response.ok) {
+        throw new Error(`Failed to save datacenter: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      const dataStr = JSON.stringify(responseData, null, 2);
+      const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+      const exportName = `datacenter_design_${datacenter.style_id || 'custom'}_${new Date().toISOString().slice(0, 10)}.json`;
+
+      const a = document.createElement('a');
+      a.href = dataUri;
+      a.download = exportName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(dataUri);
+    } catch (err) {
+      console.error('Error saving datacenter:', err);
+      alert('Failed to save datacenter. Please try again.');
+    }
+  };
 
   useEffect(() => {
     const fetchDatacenterDetails = async () => {
@@ -117,13 +152,15 @@ export default function DatacenterDetailsPage() {
                 </div>
               </div>
 
-              <div className="flex space-x-4">
-                <Link
-                  href={`/designer/${encodeURIComponent(datacenter.style_id)}?datacenter=${encodeURIComponent(datacenter.id)}`}
-                  className="px-4 py-2 bg-[#0e3e7b] hover:bg-[#1a5aab] rounded-md flex-1 text-center"
+              <div className="flex justify-end space-x-4">
+                <Button
+                  variant="outline"
+                  className="bg-[#011845] border-[#0e3e7b] hover:bg-[#0a2d5e] text-white"
+                  onClick={() => handleSaveDesign()}
                 >
-                  Edit Datacenter
-                </Link>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save
+                </Button>
                 <button
                   className="px-4 py-2 bg-red-900 hover:bg-red-800 rounded-md"
                   onClick={() => {
