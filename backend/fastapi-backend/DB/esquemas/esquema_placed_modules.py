@@ -18,6 +18,20 @@ def placed_module_esquema(placed_module) -> dict:
         "datacenter_id": placed_module.get("datacenter_id", None)
     }
 
+    # Handle module data - could be embedded or referenced
+    if "module" in placed_module:
+        if isinstance(placed_module["module"], dict):
+            # Embedded module
+            result["module"] = module_esquema(placed_module["module"])
+        else:
+            # Just the ID was stored
+            result["module_id"] = str(placed_module["module"])
+            result["module"] = None
+    elif "module_id" in placed_module:
+        # Store the module ID separately
+        result["module_id"] = placed_module["module_id"]
+        result["module"] = None
+
     return result
 
 def placed_modules_esquema(placed_modules) -> list:
