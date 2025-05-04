@@ -25,8 +25,7 @@ export default function DatacenterGrid({
   onRemoveModule,
   isPlacingModule,
   selectedModule,
-}: DatacenterGridProps) {
-  const { camera, gl, scene } = useThree()
+}: DatacenterGridProps) {  const { camera, gl, scene } = useThree()
   const [hoverPosition, setHoverPosition] = useState<{ x: number; y: number } | null>(null)
   const [rotation, setRotation] = useState(0)
   const [isValidPlacement, setIsValidPlacement] = useState(true)

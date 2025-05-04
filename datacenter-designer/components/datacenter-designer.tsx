@@ -70,6 +70,28 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
   // Orbit controls ref 
   const orbitControlsRef = useRef<any>(null);
 
+  // Orientation state (azimuth and polar angles)
+  const [orientation, setOrientation] = useState({ azimuth: 0, polar: 0 });
+
+  // Update orientation when OrbitControls change
+  useEffect(() => {
+    const controls = orbitControlsRef.current;
+    if (!controls) return;
+
+    const handleChange = () => {
+      setOrientation({
+        azimuth: controls.getAzimuthalAngle(),
+        polar: controls.getPolarAngle(),
+      });
+    };
+
+    controls.addEventListener("change", handleChange);
+    // Set initial orientation
+    handleChange();
+
+    return () => controls.removeEventListener("change", handleChange);
+  }, [orbitControlsRef.current]);
+
   const startResizing = (e: React.MouseEvent) => {
     e.preventDefault();
     resizingRef.current = true;
@@ -534,9 +556,80 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
 
             />
           </Canvas>
+        </div>
 
+        <div
+          style={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+            background: "#012456",
+            color: "#fff",
+            borderRadius: 12,
+            boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
+            padding: 20,
+            minWidth: 180,
+            zIndex: 1000,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 16,
+          }}
+        >
+          {/* Orientation Indicator as a button */}
+          <button
+            onClick={resetCameraView}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              marginBottom: 8,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+            title="Reset View"
+          >
+            <svg width="48" height="48" viewBox="0 0 48 48">
+              <g
+                transform={`rotate(${-orientation.azimuth * 180 / Math.PI} 24 24)`}
+              >
+                <defs>
+                  <marker id="arrowhead-red" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                    <polygon points="0 0, 6 3, 0 6" fill="#ff5555" />
+                  </marker>
+                  <marker id="arrowhead-green" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                    <polygon points="0 0, 6 3, 0 6" fill="#55ff55" />
+                  </marker>
+                  <marker id="arrowhead-blue" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                    <polygon points="0 0, 6 3, 0 6" fill="#5599ff" />
+                  </marker>
+                </defs>
+                <line x1="24" y1="24" x2="44" y2="24" stroke="#ff5555" strokeWidth="3" markerEnd="url(#arrowhead-red)" />
+                <line x1="24" y1="24" x2="24" y2="4" stroke="#55ff55" strokeWidth="3" markerEnd="url(#arrowhead-green)" />
+                <line x1="24" y1="24" x2="10" y2="38" stroke="#5599ff" strokeWidth="3" markerEnd="url(#arrowhead-blue)" />
+              </g>
+            </svg>
+            <div style={{ fontSize: 12, marginTop: 2, textAlign: "center" }}>Reset View</div>
+          </button>
 
-
+          {/* Auto Generate Button */}
+          <button
+            style={{
+              width: "100%",
+              padding: "8px 0",
+              background: "#0ea5e9",
+              color: "#fff",
+              border: "none",
+              borderRadius: 6,
+              cursor: "pointer",
+              fontWeight: 600,
+            }}
+            onClick={genFunction}
+          >
+            Auto Generate
+          </button>
         </div>
       </div>
     </div>
