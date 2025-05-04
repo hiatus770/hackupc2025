@@ -60,7 +60,7 @@ export default function SelectStylePage() {
       }
     };
 
-    fetchData();
+    fetchData(); 
   }, []);
 
   // Format date to readable format
@@ -70,7 +70,6 @@ export default function SelectStylePage() {
   };
 
   return (
-<<<<<<< HEAD
     <main className="flex min-h-screen flex-col items-center justify-center p-0 bg-gradient-to-br from-[#011627] via-[#012456] to-[#0e3e7b] text-white relative overflow-x-hidden">
       {/* Decorative Blueprint Grid Overlay */}
       <div
@@ -90,11 +89,6 @@ export default function SelectStylePage() {
         <p className="text-lg text-[#7ecfff] font-medium tracking-wide">
           Design, visualize, and manage your datacenters with AI-powered blueprints.
         </p>
-=======
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-[#011627] text-white">
-      <div className="mb-8 text-center">
-        <p className="text-4xl font-bold text-[#a3be8c]">✨ Rack Attack ✨</p>
->>>>>>> b36ab03d6c70c8e40e47c6e24eaa74184affb82d
       </div>
 
       <section className="w-full max-w-6xl z-10">
