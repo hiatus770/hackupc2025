@@ -106,7 +106,27 @@ async def get_datacenter(id: str, include_modules: bool = True):
         if not datacenter:
             raise HTTPException(status_code=404, detail=f"Datacenter with ID {id} not found")
 
-        return datacenter_esquema(datacenter)
+        # Extract modules if they exist
+        modules_list = []
+        if include_modules and "modules" in datacenter:
+            for module in datacenter.get("modules", []):
+                module_id = module.get("module_id") or (module.get("module", {}) or {}).get("id")
+                if not module_id:
+                    continue
+
+                modules_list.append({
+                    "id": module_id,
+                    "position": module.get("position", {}),
+                    "rotation": module.get("rotation", 0)
+                })
+
+        # Create response in requested format
+        response = {
+            "styleId": datacenter.get("style_id", ""),
+            "modules": modules_list
+        }
+
+        return response
     except HTTPException:
         raise
     except Exception as e:
