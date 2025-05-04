@@ -90,6 +90,41 @@ export default function DesignerControls({
     URL.revokeObjectURL(dataUri)
   }
 
+  const handleSaveInDB = async () => {
+    // Create object to export with simplified format
+    const modules = placedModules.map(pm => ({
+      id: pm.module.id,
+      position: pm.position,
+      rotation: pm.rotation
+    }));
+
+    const designData = {
+      styleId: selectedStyle?.id,
+      modules
+    }
+
+    try {
+      // Send data to the server
+      const response = await fetch(`/api/datacenters/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(designData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to save datacenter: ${response.status}`);
+      }
+
+      const result = await response.json();
+      alert(`Datacenter saved successfully! ID: ${result.id || 'unknown'}`);
+    } catch (err) {
+      console.error('Error saving datacenter to DB:', err);
+      alert('Failed to save datacenter to database. Please try again.');
+    }
+  }
+
   const handleLoadDesign = () => {
     // Create a hidden file input to select the file
     const input = document.createElement('input');
@@ -199,6 +234,14 @@ export default function DesignerControls({
           >
             <Save className="mr-2 h-4 w-4" />
             Save
+          </Button>
+          <Button
+            variant="outline"
+            className="bg-[#011845] border-[#0e3e7b] hover:bg-[#0a2d5e] text-white"
+            onClick={handleSaveInDB}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Save in DB
           </Button>
           <Button
             variant="outline"
