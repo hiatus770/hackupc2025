@@ -71,6 +71,14 @@ function ModuleModel({ moduleId, width, depth, color }: { moduleId: string; widt
     position = [0, 0, 0]
     scale = [width / 2, 5, depth / 2]
   }
+  if (moduleId.includes("water_treatment")) {
+    position = [0, 0, 0]
+    scale = [width / 2.5, 2 + width/40 , depth/1.5]
+  }
+  if (moduleId.includes("_rack")) {
+    position = [0, 1.5, 0]
+    scale = [width*1.3, width, depth*2]
+  }
 
   return (
     <primitive
