@@ -13,6 +13,9 @@ interface ModuleObjectProps {
   isPreview?: boolean
   isValidPlacement?: boolean
   onRemove?: () => void
+  isHovered?: boolean
+  setHovered?: () => void
+  unsetHovered?: () => void
 }
 
 // Always call useLoader, let Suspense handle loading/failure
@@ -105,10 +108,10 @@ export default function ModuleObject({
   isPreview = false,
   isValidPlacement = true,
   onRemove,
-
+  isHovered = false,
+  setHovered,
+  unsetHovered,
 }: ModuleObjectProps) {
-  const [hovered, setHovered] = useState(false)
-
   const { module, position, rotation } = placedModule
 
   // Calculate dimensions based on rotation
@@ -127,7 +130,7 @@ export default function ModuleObject({
   if (isPreview) {
     opacity = 0.5
     color = isValidPlacement ? "#4CAF50" : "#F44336"
-  } else if (hovered) {
+  } else if (isHovered) {
     color = "#1a4d8c"
   } else {
     switch (module.type) {
@@ -159,8 +162,8 @@ export default function ModuleObject({
     <group
       position={[x, 0.5, z]}
       rotation={[0, (rotation * Math.PI) / 180, 0]}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
+      onPointerOver={setHovered}
+      onPointerOut={unsetHovered}
       onClick={(e) => {
         if (!isPreview && onRemove && e.button === 2) {
           e.stopPropagation()
@@ -193,7 +196,7 @@ export default function ModuleObject({
       </Text>
 
       {/* Module details (only show when hovered and not a preview) */}
-      {hovered && !isPreview && (
+      {isHovered && !isPreview && (
         <Text
           position={[0, 0.6, depth / 2 - 1]}
           rotation={[-Math.PI / 2, 0, 0]}

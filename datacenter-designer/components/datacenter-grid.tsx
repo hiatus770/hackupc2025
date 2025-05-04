@@ -25,10 +25,12 @@ export default function DatacenterGrid({
   onRemoveModule,
   isPlacingModule,
   selectedModule,
-}: DatacenterGridProps) {  const { camera, gl, scene } = useThree()
+}: DatacenterGridProps) {  
+  const { camera, gl, scene } = useThree()
   const [hoverPosition, setHoverPosition] = useState<{ x: number; y: number } | null>(null)
   const [rotation, setRotation] = useState(0)
   const [isValidPlacement, setIsValidPlacement] = useState(true)
+  const [hoveredModuleId, setHoveredModuleId] = useState<string | null>(null)
   const raycaster = useRef(new Raycaster())
   const plane = useRef(new Plane(new Vector3(0, 1, 0), 0))
   const intersection = useRef(new Vector3())
@@ -89,6 +91,19 @@ export default function DatacenterGrid({
       window.removeEventListener("keydown", handleKeyDown)
     }
   }, [gl, isPlacingModule, selectedModule, hoverPosition, onPlaceModule, rotation, isValidPlacement])
+
+  // Remove module on Backspace
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Backspace" && hoveredModuleId) {
+        event.preventDefault();
+        onRemoveModule(hoveredModuleId);
+        setHoveredModuleId(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [hoveredModuleId, onRemoveModule]);
 
   const checkPlacementValidity = (x: number, y: number, module: Module, rotation: number): boolean => {
     if (!module) return false
@@ -183,6 +198,9 @@ export default function DatacenterGrid({
           }}
           gridWidth={width}
           gridHeight={height}
+          isHovered={hoveredModuleId === placedModule.id}
+          setHovered={() => setHoveredModuleId(placedModule.id)}
+          unsetHovered={() => setHoveredModuleId(null)}
           onRemove={() => onRemoveModule(placedModule.id)}
         />
       ))}

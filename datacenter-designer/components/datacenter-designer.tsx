@@ -23,7 +23,6 @@ export default function DatacenterDesigner({ styleId, styleData }: DatacenterDes
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
   const [placedModules, setPlacedModules] = useState<PlacedModule[]>([])
   const [gridSize, setGridSize] = useState({ width: styleData.dim[0] / 10, height: styleData.dim[1] / 10 })
-  console.log("Grid Size:", gridSize);
 
   const [totalCost, setTotalCost] = useState(0);
   const [totalPower, setTotalPower] = useState(0);
