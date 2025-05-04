@@ -127,7 +127,7 @@ async def get_datacenter_simple(id: str):
         # Transform to the simplified format
         simple_modules = []
         for module in datacenter.get("modules", []):
-            module_id = module.get("module_id") or (module.get("module", {}) or {}).get("id")
+            module_id = module.get("module_id")
             if not module_id:
                 continue
 
@@ -192,26 +192,19 @@ async def create_datacenter(datacenter_request: DatacenterCreateSimple):
 
         # Now process all modules
         for module_pos in datacenter_request.modules:
-            # Fetch the module details by ID
+            # Verify the module exists
             module_info = module_repo.get_by_id(module_pos.id)
             if not module_info:
                 missing_modules.append(module_pos.id)
                 continue  # Skip if module not found
 
-            # Create a placed module
+            # Create a placed module - only store the module_id, not the full module object
             placed_module = {
-                "module_id": module_pos.id,  # Store the ID separately
+                "module_id": module_pos.id,
                 "position": module_pos.position.dict(),
                 "rotation": module_pos.rotation,
                 "datacenter_id": datacenter_id
             }
-
-            # Store full module info if available (can be referenced later)
-            if module_info:
-                # Convert ObjectId to string to make it JSON serializable
-                if "_id" in module_info:
-                    module_info["_id"] = str(module_info["_id"])
-                placed_module["module"] = module_info
 
             # Add to database
             placed_id = placed_module_repo.create(placed_module)
@@ -302,15 +295,14 @@ async def update_datacenter_layout(id: str, layout_request: DatacenterCreateSimp
 
         # Process all new modules
         for module_pos in layout_request.modules:
-            # Fetch the module details by ID
+            # Verify the module exists
             module_info = module_repo.get_by_id(module_pos.id)
             if not module_info:
                 continue  # Skip if module not found
 
-            # Create a placed module
+            # Create a placed module - only store the module_id, not the full module
             placed_module = {
-                "module": module_info,  # Full module info
-                "module_id": module_pos.id,  # Also store the ID separately
+                "module_id": module_pos.id,
                 "position": module_pos.position.dict(),
                 "rotation": module_pos.rotation,
                 "datacenter_id": id
@@ -358,9 +350,17 @@ async def add_module_to_datacenter(id: str, placed_module: PlacedModule):
         if not existing:
             raise HTTPException(status_code=404, detail=f"Datacenter with ID {id} not found")
 
+        # Verify the module exists before placing it
+        if not module_repo.get_by_id(placed_module.module_id):
+            raise HTTPException(status_code=404, detail=f"Module with ID {placed_module.module_id} not found")
+
         # Set the datacenter ID
         placed_module_dict = placed_module.dict()
         placed_module_dict["datacenter_id"] = id
+
+        # Ensure we don't store the full module object
+        if "module" in placed_module_dict:
+            del placed_module_dict["module"]
 
         # Create the placed module
         module_id = placed_module_repo.create(placed_module_dict)
