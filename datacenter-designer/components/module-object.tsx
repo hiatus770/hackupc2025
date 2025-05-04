@@ -44,22 +44,29 @@ function ModuleModel({ moduleId, width, depth, color }: { moduleId: string; widt
   // Force color on all meshes
   obj.traverse?.((child: any) => {
     if (child.isMesh) {
+      // Deep clone the material so each mesh is unique
       if (child.material) {
         if (Array.isArray(child.material)) {
           child.material = child.material.map((mat: any) => {
-            if (mat && mat.color && mat.color.set) mat.color.set(color)
-            return mat
-          })
+            const cloned = mat.clone ? mat.clone() : mat;
+            if (cloned && cloned.color && cloned.color.set) cloned.color.set(color);
+            return cloned;
+          });
         } else {
-          if (child.material.color && child.material.color.set) {
-            child.material.color.set(color)
+          if (child.material.clone) {
+            child.material = child.material.clone();
+            if (child.material.color && child.material.color.set) {
+              child.material.color.set(color);
+            }
+          } else if (child.material.color && child.material.color.set) {
+            child.material.color.set(color);
           }
         }
       }
-      child.castShadow = true
-      child.receiveShadow = true
+      child.castShadow = true;
+      child.receiveShadow = true;
     }
-  })
+  });
 
   let position = [0, width / 3, 0]
   let scale = [width / 2, width / 2, depth / 2]
@@ -73,11 +80,11 @@ function ModuleModel({ moduleId, width, depth, color }: { moduleId: string; widt
   }
   if (moduleId.includes("water_treatment")) {
     position = [0, 0, 0]
-    scale = [width / 2.5, 2 + width/40 , depth/1.5]
+    scale = [width / 2.5, 2 + width / 40, depth / 1.5]
   }
   if (moduleId.includes("_rack")) {
     position = [0, 1.5, 0]
-    scale = [width*1.3, width, depth*2]
+    scale = [width * 1.3, width, depth * 2]
   }
 
   return (
@@ -98,6 +105,7 @@ export default function ModuleObject({
   isPreview = false,
   isValidPlacement = true,
   onRemove,
+
 }: ModuleObjectProps) {
   const [hovered, setHovered] = useState(false)
 
@@ -144,6 +152,8 @@ export default function ModuleObject({
         color = "#0e3e7b"
     }
   }
+
+  console.log("Object ID ", module.id, module.dim[0], module.dim[1], " color ", color);
 
   return (
     <group
